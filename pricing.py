@@ -62,4 +62,5 @@ price_result["bias_int20"]=price_result["vwap"]-price_result["int20"]
 price_result["bias_int30"]=price_result["vwap"]-price_result["int30"]
 
 writer=pd.ExcelWriter("price_result.xlsx")
-price_result.to_excel(writer)
+with writer:
+    price_result.to_excel(writer)

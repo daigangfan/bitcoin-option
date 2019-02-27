@@ -48,6 +48,11 @@ def fix_strike(x:str):
 results["strike"]=results["strike"].apply(fix_strike)
 results=results.query("volume>0")
 
+#修正价格
+results["vwap"]=results["vwap"]/100
+results["last_ask"]=results["last_ask"]/100
+results["last_bid"]=results["last_bid"]/100
+
 writer=pd.ExcelWriter("ledgerx_data.xlsx")
 with writer:
     results.to_excel(writer)
