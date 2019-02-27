@@ -21,7 +21,7 @@ def get_volatility(x):
     data_used = btc_data.query("Date<@end_date and Date>=@start_date")
     volatility = data_used["log_ret"].std()
     return volatility
-
+btc_data["volatility"]=btc_data["Date"].apply(get_volatility)
 
 def get_spot_price(x):
     date = x
@@ -64,3 +64,7 @@ price_result["bias_int30"]=price_result["vwap"]-price_result["int30"]
 writer=pd.ExcelWriter("price_result.xlsx")
 with writer:
     price_result.to_excel(writer)
+
+writer=pd.ExcelWriter("btc_data.xlsx")
+with writer:
+    btc_data.to_excel(writer)
