@@ -56,5 +56,10 @@ prices["int20"]=option_data.apply(Pricing,axis=1,ints=0.2)
 prices["int30"]=option_data.apply(Pricing,axis=1,ints=0.3)
 price_result=pd.concat([option_data,prices],axis=1)
 
+price_result["bias_int5"]=price_result["vwap"]-price_result["int5"]
+price_result["bias_int10"]=price_result["vwap"]-price_result["int10"]
+price_result["bias_int20"]=price_result["vwap"]-price_result["int20"]
+price_result["bias_int30"]=price_result["vwap"]-price_result["int30"]
+
 writer=pd.ExcelWriter("price_result.xlsx")
 price_result.to_excel(writer)
