@@ -52,6 +52,8 @@ results=results.query("volume>0")
 results["vwap"]=results["vwap"]/100
 results["last_ask"]=results["last_ask"]/100
 results["last_bid"]=results["last_bid"]/100
+results["date"]=results["date"].apply(lambda x:datetime.strptime(x,"%Y-%m-%d"))
+results["exp_date"]=results["exp_date"].apply(lambda x:datetime.strptime(x,"%Y-%m-%d"))
 
 writer=pd.ExcelWriter("ledgerx_data.xlsx")
 with writer:

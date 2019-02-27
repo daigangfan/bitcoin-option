@@ -15,7 +15,7 @@ delta = relativedelta(days=-30)
 
 
 def get_volatility(x):
-    end_date = datetime.strptime(x, r"%Y-%m-%d")
+    end_date =x
     start_date = end_date+delta
     # which side is equal?
     data_used = btc_data.query("Date<@end_date and Date>=@start_date")
@@ -24,7 +24,7 @@ def get_volatility(x):
 
 
 def get_spot_price(x):
-    date = datetime.strptime(x, "%Y-%m-%d")
+    date = x
     data_used = btc_data.query("Date==@date")
     return float(data_used["Price"].values[0].replace(",", ""))
 
@@ -32,8 +32,8 @@ def get_spot_price(x):
 option_data["volatility"] = option_data["date"].apply(get_volatility)
 option_data["spot_price"] = option_data["date"].apply(get_spot_price)
 def Pricing(x,ints=0.05):
-    maturity_date=datetime.strptime(x["exp_date"],"%Y-%m-%d")
-    start_date=datetime.strptime(x["date"],"%Y-%m-%d")
+    maturity_date=x["exp_date"]
+    start_date=x["date"]
     time=((maturity_date-start_date).days+1)/365
     if time>0:
         

@@ -3,3 +3,6 @@
 .idea/new_part.iml
 .idea/vcs.xml
 .idea/workspace.xml
+*.aux
+*.log
+out/*
