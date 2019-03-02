@@ -11,9 +11,10 @@ btc_data["Date"] = btc_data["Date"].apply(
 btc_data.sort_values("Date", inplace=True)
 btc_data["log_ret"] = btc_data["Change %"].apply(
     lambda x: log(1 + float(x.strip('%')) / 100))
+# TODO:波动率的计算，用`rolling`的方式包含今日，是否合适？
 btc_data["volatility"] = btc_data["log_ret"].rolling(30).std()
 
-
+# TODO:波动率窗口的选择（如何确定30天窗口是比较好的？）
 def get_volatility(x):
     start_date = x
     data_used = btc_data.query("Date==@start_date")
@@ -29,7 +30,7 @@ def get_spot_price(x):
 option_data["volatility"] = option_data["date"].apply(get_volatility)
 option_data["spot_price"] = option_data["date"].apply(get_spot_price)
 
-
+# TODO:年化利率的选择，包括如何选择后面研究用到的利率（怎么从5，10，20 30）中选择的？  
 def Pricing(x, ints=0.05):
     maturity_date = x["exp_date"]
     start_date = x["date"]
