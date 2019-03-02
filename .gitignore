@@ -1,8 +1,4 @@
-.idea/misc.xml
-.idea/modules.xml
-.idea/new_part.iml
-.idea/vcs.xml
-.idea/workspace.xml
+.idea/*
 *.aux
 *.log
 out/*
