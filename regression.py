@@ -27,4 +27,6 @@ def get_vol_pre(x):
     return x["imply_vol"]/np.sqrt(365)-btc_range["log_ret"].std()
 
 
-price_result["vol_pre"] = price_result
+price_result["vol_pre"] = price_result.apply(get_vol_pre,axis=1)
+
+
