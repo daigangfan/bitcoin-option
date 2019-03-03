@@ -1,29 +1,28 @@
 
-\documentclass[bachelor]{thuthesis}
+\documentclass[degree=bachelor]{thuthesis}
 \usepackage{thuthesis}
 \usepackage{booktabs}
 \begin{document}
-\section{研究方法}
-    \subsection{期权的定价}
+\chapter{研究方法}
+    \section{期权的定价}
     采用Black-Scholes模型。波动率采用30天移动窗口计算。利率分别选择5\%, 10\%, 20\%, 30\%
 
-\section{描述性统计}
+\chapter{描述性统计}
 
-\begin{table}
+\begin{table}[!ht]
     \caption{比特币数据描述性统计}
     \input{describe_btc_data.tex}
-    
 \end{table}
-\begin{table}
+\begin{table}[!ht]
     \caption{期权数据描述性统计}
 \input{describe_option_data.tex}
 \end{table}
-\begin{table}
+\begin{table}[!ht]
     \caption{期权定价差异分组统计}
-    \input{option_bias_group.latex}
+    \input{option_bias_group.tex}
 \end{table}
-\begin{table}
+\begin{table}[!ht]
     \caption{期权定价差异绝对值分组统计}
-    \input{option_abs_bias_group.latex}
+    \input{option_abs_bias_group.tex}
 \end{table}
 \end{document}

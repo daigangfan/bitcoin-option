@@ -29,7 +29,7 @@ def fix_price(x):
 btc_data["Price"] = btc_data["Price"].apply(fix_price)
 
 start_time = datetime.datetime(2017, 10, 17)
-btc_data = btc_data.query("Date>@start_time")
+btc_data = btc_data.query("Date>=@start_time")
 btc_describe = btc_data.describe()
 btc_describe.loc["count"] = btc_describe.loc["count"].astype(int)
 
@@ -50,9 +50,6 @@ with open("describe_option_data.tex", "w") as f:
     f.write(option_describe.to_latex(
         float_format=lambda x: "{:.2f}".format(x) if not isnan(x) else " "))
 
-writer = pd.ExcelWriter("price_result.xlsx")
-with writer:
-    price_result.to_excel(writer)
 
 # TODO:分组统计的数据分组方式是否合理。
 price_result["time_cut"] = pd.cut(
@@ -60,7 +57,7 @@ price_result["time_cut"] = pd.cut(
 price_result["moneyness_cut"] = pd.cut(
     price_result["S/X"], [0, 0.6, 0.8, 1.2, 3.8], right=False)
 
-price_biases = price_result.filter(regex="bias_int\d+", axis=1)
+price_biases = price_result.filter(regex=r"^bias_int\d+", axis=1)
 price_result[["abs_bias_int5", "abs_bias_int10", "abs_bias_int20",
               "abs_bias_int30"]] = price_biases.applymap(lambda x: abs(x))
 
@@ -105,11 +102,25 @@ abs_bias_int5_mean.loc["mean"] = time_cut_mean
 abs_bias_int5_mean["mean"] = moneyness_cut_mean
 
 # TODO:更改行列名，添加附注
-with open("option_bias_group.latex", "w") as f:
-    f.write(bias_int5_mean.to_latex(float_format=lambda x: "{:.2f}".format(
-        x) if not isnan(x) else " " ))
+with open("option_bias_group.tex", "w") as f:
+    latex_str=bias_int5_mean.to_latex(float_format=lambda x: "{:.2f}".format(
+        x) if not isnan(x) else " ")
+    latex_str=latex_str.replace("[","")
+    latex_str=latex_str.replace(")","")
+
+    f.write(latex_str)
 
 # TODO:更改行列名，添加附注
-with open("option_abs_bias_group.latex", "w") as f:
-    f.write(abs_bias_int5_mean.to_latex(
-        float_format=lambda x: "{:.2f}".format(x) if not isnan(x) else " " ))
+with open("option_abs_bias_group.tex", "w") as f:
+    latex_str=abs_bias_int5_mean.to_latex(float_format=lambda x: "{:.2f}".format(
+        x) if not isnan(x) else " ")
+    latex_str=latex_str.replace("[","")
+    latex_str=latex_str.replace(")","")
+    f.write(latex_str)
+writer = pd.ExcelWriter("price_result.xlsx")
+with writer:
+    price_result.to_excel(writer)
+
+writer=pd.ExcelWriter("btc_data.xlsx")
+with writer:
+    btc_data.to_excel(writer)
