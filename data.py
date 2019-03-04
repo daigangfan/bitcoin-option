@@ -6,11 +6,15 @@ import pandas as pd
 import requests
 from dateutil import relativedelta
 
+from bs4 import BeautifulSoup
+import numpy as np 
+
 date1 = datetime(2017, 10, 17)
 delta = relativedelta.relativedelta(days=1)
 
 sess = requests.Session()
 
+# get option data from ledgerX
 
 def fetch_data(date):
     url = "https://data.ledgerx.com/json/{}.json".format(
@@ -68,3 +72,26 @@ results["exp_date"] = results["exp_date"].apply(lambda x: datetime.strptime(x, "
 writer = pd.ExcelWriter("ledgerx_data.xlsx")
 with writer:
     results.to_excel(writer)
+
+# get bitcoin data from coinmarketcap,move all preprocessing for btc_data here
+page=sess.get("https://coinmarketcap.com/currencies/bitcoin/historical-data/?start=20170801&end=20190304")
+if page.status_code==200:
+    source=page.content
+    soup=BeautifulSoup(source)
+    table=soup.find("table",{"class":"table"})
+    btc_data=pd.read_html(table.decode())[0]
+    btc_data.rename(columns={"Open*":"Open","Close**":"Price"},inplace=True)
+
+
+else:
+    print("获取比特币数据出错")
+    raise Exception("获取比特币数据出错")
+
+btc_data["Date"] = btc_data["Date"].apply(
+    lambda x: datetime.strptime(x, r"%b %d, %Y"))
+btc_data.sort_values("Date", inplace=True)
+btc_data["log_ret"]=pd.Series(np.log(btc_data["Price"])).diff()
+
+writer=pd.ExcelWriter("btc_data.xlsx")
+with writer:
+    btc_data.to_excel(writer)

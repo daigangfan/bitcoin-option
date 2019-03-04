@@ -5,12 +5,8 @@ import pandas as pd
 from scipy.stats import norm
 
 option_data = pd.read_excel("ledgerx_data.xlsx")
-btc_data = pd.read_csv("BTC_USD Bitfinex Historical Data.csv")
-btc_data["Date"] = btc_data["Date"].apply(
-    lambda x: datetime.strptime(x, r"%b %d, %Y"))
-btc_data.sort_values("Date", inplace=True)
-btc_data["log_ret"] = btc_data["Change %"].apply(
-    lambda x: log(1 + float(x.strip('%')) / 100))
+btc_data = pd.read_excel("btc_data.xlsx")
+
 # TODO:波动率的计算，用`rolling`的方式包含今日，是否合适？
 btc_data["volatility"] = btc_data["log_ret"].rolling(30).std()
 
@@ -24,7 +20,7 @@ def get_volatility(x):
 def get_spot_price(x):
     date = x
     data_used = btc_data.query("Date==@date")
-    return float(data_used["Price"].values[0].replace(",", ""))
+    return data_used["Price"].values[0]
 
 
 option_data["volatility"] = option_data["date"].apply(get_volatility)

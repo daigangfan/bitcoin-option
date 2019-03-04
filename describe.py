@@ -22,12 +22,6 @@ btc_data["skewness"] = btc_data["log_ret"].rolling(30).skew()
 btc_data["kurtosis"] = btc_data["log_ret"].rolling(30).kurt()
 
 
-def fix_price(x):
-    return float(x.replace(",", ""))
-
-
-btc_data["Price"] = btc_data["Price"].apply(fix_price)
-
 start_time = datetime.datetime(2017, 10, 17)
 btc_data = btc_data.query("Date>=@start_time")
 btc_describe = btc_data.describe()
