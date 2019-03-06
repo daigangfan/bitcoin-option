@@ -19,8 +19,6 @@
 \DeclareOption{thmnum}{\MB@thmnumtrue}
 \newif\ifMB@eqsecnum\MB@eqsecnumfalse
 \DeclareOption{eqsecnum}{\MB@eqsecnumtrue}
-\newif\ifMB@authoryear\MB@authoryearfalse
-\DeclareOption{authoryear}{\MB@authoryeartrue}
 \newif\ifMB@allcites\MB@allcitesfalse
 \DeclareOption{allcites}{\MB@allcitestrue}
 \newif\ifMB@dark\MB@darkfalse
@@ -46,11 +44,6 @@
 	}
 }
 \RequirePackage[english]{babel}
-\ifMB@authoryear
-\RequirePackage[author-year, msc-links, lite, abbrev]{amsrefs}
-\else
-\RequirePackage[alphabetic, msc-links, lite, abbrev]{amsrefs}
-\fi
 
 %\DeclareRobustCommand{}
 \ifMB@thmnum
@@ -130,7 +123,7 @@
 	%========================
 	% thanks
 	%========================
-    \section{Thanks}
+    \section*{Thanks}
 	\newcounter{ffn}
 	\setcounter{ffn}{\value{framenumber}}
 	\renewcommand{\insertframenumber}{\inserttotalframenumber}

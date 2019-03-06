@@ -1,9 +1,13 @@
 \documentclass[11pt,dark]{mathbeamer}
 \usepackage{xecjk}
+\usepackage{fontspec}
 \usepackage{cite}
+\usepackage[author-year]{amsrefs}
+\setCJKmainfont{SimSun}
+\setmainfont{SimSun}
 \title{关于比特币期权的实证研究 }
-\subtitle{本科生综合论文训练 \newline 开题报告}
-\author[代港凡 2015012502]{代港凡 2015012502 \newline 指导教师:王茵田}
+\subtitle{本科生综合论文训练 开题报告}
+\author[代港凡 2015012502]{代港凡 2015012502 \and 指导教师:王茵田}
 \institute{清华大学经济管理学院}
 \date{\today}
 \setbeamertemplate{footline}
@@ -28,11 +32,23 @@
 \end{frame}
 \section{选题描述}
 \frame{\tableofcontents[currentsection]}
+\subsection{选题背景}
 \begin{frame}{选题背景}
-    2008年，中本聪在网络上发表了题为“比特币：一种点对点的电子货币系统”\cite{Nakamoto_bitcoin:a}。
+    2008年，中本聪在网络上发表了题为“比特币：一种点对点的电子货币系统”\cite{Nakamoto_bitcoin:a}，正式提出了第一种完善的加密货币。
+    因为其去中心化、安全、私密的特点，比特币很快受到了大众欢迎。虽然学术界对于比特币是否是货币、是否有价值仍存在较大的争议，但不可否认的是比特币已经成为了一种金融资产。
+\end{frame}
+\begin{frame}{选题背景}
+    随着比特币交易市场的渐渐成熟，人们对于投机交易和风险控制的需求也逐渐提升。各大交易所纷纷推出了比特币期货或者远期合约。在此基础上，Deribit和LedgerX先后于2016年和2017年推出了比特币期权合约。
+    \newline 这些期权合约均为欧式，条款简单，但同时也为从另一个维度研究比特币市场提供了手段。
+    \newline 本篇论文旨在利用已有的比特币交易数据，通过对期权真实价格和理论价格之间差异的研究，发现比特币市场摩擦的来源，同时论证利用合理模型进行对冲交易的可行性。
+  \end{frame}
+\subsection{选题目的}
+\begin{frame}{选题目的}
+  
 \end{frame}
 \section{Reference}
-	\begin{frame}[t, allowframebreaks]{Reference}
+    \begin{frame}[t, allowframebreaks]{Reference}
+        \bibliographystyle{plain}
 		\bibliography{slides/bib}
 	\end{frame}
 \end{document}

@@ -2,32 +2,55 @@
 \documentclass[degree=bachelor]{thuthesis}
 \usepackage{thuthesis}
 \usepackage{booktabs}
+
 \begin{document}
 \chapter{研究方法}
     \section{期权的定价}
-    采用Black-Scholes模型。波动率采用30天移动窗口计算。利率分别选择5\%, 10\%, 20\%, 30\%
+    本文首先采用Black-Scholes模型\cite{10.2307/1831029}对比特币进行定价。Black-Scholes模型对交易资产及其市场有如下假设：
+    \begin{itemize}
+        \item 存在已知且恒定的无风险收益率r。
+        \item 资产价格为带漂移随机游走过程， 即$dS={\mu}Sdt+{\sigma}SdW$，其中价格波动率$\sigma$为已知的常数。可以推导出在这一假设下资产的收益率服从对数正态分布。
+        \item 期权为欧式期权，即只有到期时期权的购买者才能够行权。
+        \item 买卖期权和标的资产时不会产生交易费用和其他损失。
+        \item 能够以无风险利率自由借入借出任意数量的资产。
+        \item 对卖空操作无限制。
+    \end{itemize}
+    在以上假设下，市场上不存在套利机会。
 
 \chapter{描述性统计}
 
 \begin{table}[!ht]
+    \centering
     \caption{比特币数据描述性统计}
     \input{describe_btc_data.tex}
 \end{table}
+
 \begin{table}[!ht]
+    \centering
     \caption{期权数据描述性统计}
 \input{describe_option_data.tex}
 \end{table}
+
 \begin{table}[!ht]
+    \centering
     \caption{期权定价差异分组统计}
     \input{option_bias_group.tex}
 \end{table}
+
 \begin{table}[!ht]
+    \centering
     \caption{期权定价差异绝对值分组统计}
     \input{option_abs_bias_group.tex}
 \end{table}
+
 \chapter{回归分析}
+
 \begin{table}[!ht]
+    \centering
     \caption{线性回归模型结果}
     \input{regression_table.tex}
 \end{table}
+
+\bibliographystyle{plain}
+\bibliography{paperbib}
 \end{document}
