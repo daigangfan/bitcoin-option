@@ -1,0 +1,38 @@
+\documentclass[11pt,dark]{mathbeamer}
+\usepackage{xecjk}
+\usepackage{cite}
+\title{关于比特币期权的实证研究 }
+\subtitle{本科生综合论文训练 \newline 开题报告}
+\author[代港凡 2015012502]{代港凡 2015012502 \newline 指导教师:王茵田}
+\institute{清华大学经济管理学院}
+\date{\today}
+\setbeamertemplate{footline}
+{
+  \leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}[wd=.3\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
+    \usebeamerfont{author in head/foot}\insertshortauthor
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.4\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
+    \usebeamerfont{title in head/foot}\insertshorttitle
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.3\paperwidth,ht=2.25ex,dp=1ex,center]{date in head/foot}%
+    \insertframenumber{} / \inserttotalframenumber\hspace*{1ex}
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}
+\begin{document}
+\section*{目录}
+\begin{frame}{目录}
+    \tableofcontents
+\end{frame}
+\section{选题描述}
+\frame{\tableofcontents[currentsection]}
+\begin{frame}{选题背景}
+    2008年，中本聪在网络上发表了题为“比特币：一种点对点的电子货币系统”\cite{Nakamoto_bitcoin:a}。
+\end{frame}
+\section{Reference}
+	\begin{frame}[t, allowframebreaks]{Reference}
+		\bibliography{slides/bib}
+	\end{frame}
+\end{document}
