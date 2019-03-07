@@ -4,3 +4,4 @@
 out/*
 *.docx
 *.pdf
+.vscode
