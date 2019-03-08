@@ -31,7 +31,7 @@ def fetch_data(date):
 results = pd.DataFrame()
 with ThreadPoolExecutor(20) as executor:
     to_do = []
-    while date1 <= datetime(2018, 11, 2):
+    while date1 <= datetime(2018, 12, 31):
         future = executor.submit(fetch_data, date1
                                  )
         to_do.append(future)
