@@ -36,8 +36,10 @@ option_initial_data = price_result.groupby("contract_label").first()
 # TODO:对期限的统计是否有意义，因为第一条数据未必是发行日，存在大量期限为1的数据
 option_describe = option_initial_data[["time", "strike"]].describe()
 
-option_describe.loc["count", "call_number"] = 165
-option_describe.loc["count", "put_number"] = 91
+option_describe.loc["count", "call_number"] = option_initial_data["contract_is_call"].value_counts()[
+    1]
+option_describe.loc["count", "put_number"] = option_initial_data["contract_is_call"].value_counts()[
+    0]
 
 # TODO:更改行列名，添加附注
 with open("describe_option_data.tex", "w") as f:
@@ -62,6 +64,9 @@ abs_bias_int5_mean = price_result_grouped["abs_bias_int5"].mean()
 
 bias_int5_mean = bias_int5_mean.unstack("time_cut")
 abs_bias_int5_mean = abs_bias_int5_mean.unstack("time_cut")
+
+block_counts = price_result_grouped.size()
+block_counts = block_counts.unstack("time_cut")
 
 
 def reformat_index(x: pd.DataFrame):
@@ -97,24 +102,30 @@ abs_bias_int5_mean["mean"] = moneyness_cut_mean
 
 # TODO:更改行列名，添加附注
 with open("option_bias_group.tex", "w") as f:
-    latex_str=bias_int5_mean.to_latex(float_format=lambda x: "{:.2f}".format(
+    latex_str = bias_int5_mean.to_latex(float_format=lambda x: "{:.2f}".format(
         x) if not isnan(x) else " ")
-    latex_str=latex_str.replace("[","")
-    latex_str=latex_str.replace(")","")
+    latex_str = latex_str.replace("[", "")
+    latex_str = latex_str.replace(")", "")
 
     f.write(latex_str)
 
 # TODO:更改行列名，添加附注
 with open("option_abs_bias_group.tex", "w") as f:
-    latex_str=abs_bias_int5_mean.to_latex(float_format=lambda x: "{:.2f}".format(
+    latex_str = abs_bias_int5_mean.to_latex(float_format=lambda x: "{:.2f}".format(
         x) if not isnan(x) else " ")
-    latex_str=latex_str.replace("[","")
-    latex_str=latex_str.replace(")","")
+    latex_str = latex_str.replace("[", "")
+    latex_str = latex_str.replace(")", "")
+    f.write(latex_str)
+with open("option_counts_group.tex", "w") as f:
+    latex_str = block_counts.to_latex(float_format=lambda x: "{:.2f}".format(
+        x) if not isnan(x) else " ")
+    latex_str = latex_str.replace("[", "")
+    latex_str = latex_str.replace(")", "")
     f.write(latex_str)
 writer = pd.ExcelWriter("price_result.xlsx")
 with writer:
     price_result.to_excel(writer)
 
-writer=pd.ExcelWriter("btc_data.xlsx")
+writer = pd.ExcelWriter("btc_data.xlsx")
 with writer:
     btc_data.to_excel(writer)
