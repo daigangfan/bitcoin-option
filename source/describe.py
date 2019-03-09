@@ -5,9 +5,9 @@ import pandas as pd
 
 from math import isnan
 
-price_result = pd.read_excel("price_result.xlsx")
+price_result = pd.read_excel("data/price_result.xlsx")
 price_result["S/X"] = price_result["spot_price"] / price_result["strike"]
-btc_data = pd.read_excel("btc_data.xlsx")
+btc_data = pd.read_excel("data/btc_data.xlsx")
 
 
 def get_time(x):
@@ -42,7 +42,7 @@ option_describe.loc["count", "put_number"] = option_initial_data["contract_is_ca
     0]
 
 # TODO:更改行列名，添加附注
-with open("describe_option_data.tex", "w") as f:
+with open("drift/describe_option_data.tex", "w") as f:
     f.write(option_describe.to_latex(
         float_format=lambda x: "{:.2f}".format(x) if not isnan(x) else " "))
 
@@ -101,7 +101,7 @@ abs_bias_int5_mean.loc["mean"] = time_cut_mean
 abs_bias_int5_mean["mean"] = moneyness_cut_mean
 
 # TODO:更改行列名，添加附注
-with open("option_bias_group.tex", "w") as f:
+with open("drift/option_bias_group.tex", "w") as f:
     latex_str = bias_int5_mean.to_latex(float_format=lambda x: "{:.2f}".format(
         x) if not isnan(x) else " ")
     latex_str = latex_str.replace("[", "")
@@ -110,22 +110,22 @@ with open("option_bias_group.tex", "w") as f:
     f.write(latex_str)
 
 # TODO:更改行列名，添加附注
-with open("option_abs_bias_group.tex", "w") as f:
+with open("drift/option_abs_bias_group.tex", "w") as f:
     latex_str = abs_bias_int5_mean.to_latex(float_format=lambda x: "{:.2f}".format(
         x) if not isnan(x) else " ")
     latex_str = latex_str.replace("[", "")
     latex_str = latex_str.replace(")", "")
     f.write(latex_str)
-with open("option_counts_group.tex", "w") as f:
+with open("drift/option_counts_group.tex", "w") as f:
     latex_str = block_counts.to_latex(float_format=lambda x: "{:.2f}".format(
         x) if not isnan(x) else " ")
     latex_str = latex_str.replace("[", "")
     latex_str = latex_str.replace(")", "")
     f.write(latex_str)
-writer = pd.ExcelWriter("price_result.xlsx")
+writer = pd.ExcelWriter("data/price_result.xlsx")
 with writer:
     price_result.to_excel(writer)
 
-writer = pd.ExcelWriter("btc_data.xlsx")
+writer = pd.ExcelWriter("data/btc_data.xlsx")
 with writer:
     btc_data.to_excel(writer)

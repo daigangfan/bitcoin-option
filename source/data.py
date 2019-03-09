@@ -69,7 +69,7 @@ results["last_bid"] = results["last_bid"] / 100
 results["date"] = results["date"].apply(lambda x: datetime.strptime(x, "%Y-%m-%d"))
 results["exp_date"] = results["exp_date"].apply(lambda x: datetime.strptime(x, "%Y-%m-%d"))
 
-writer = pd.ExcelWriter("ledgerx_data.xlsx")
+writer = pd.ExcelWriter("data/ledgerx_data.xlsx")
 with writer:
     results.to_excel(writer)
 
@@ -92,6 +92,6 @@ btc_data["Date"] = btc_data["Date"].apply(
 btc_data.sort_values("Date", inplace=True)
 btc_data["log_ret"]=pd.Series(np.log(btc_data["Price"])).diff()
 
-writer=pd.ExcelWriter("btc_data.xlsx")
+writer=pd.ExcelWriter("data/btc_data.xlsx")
 with writer:
     btc_data.to_excel(writer)

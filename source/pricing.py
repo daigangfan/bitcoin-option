@@ -4,8 +4,8 @@ from math import log, sqrt, exp
 import pandas as pd
 from scipy.stats import norm
 
-option_data = pd.read_excel("ledgerx_data.xlsx")
-btc_data = pd.read_excel("btc_data.xlsx")
+option_data = pd.read_excel("data/ledgerx_data.xlsx")
+btc_data = pd.read_excel("data/btc_data.xlsx")
 
 # TODO:波动率的计算，用`rolling`的方式包含今日，是否合适？
 btc_data["volatility"] = btc_data["log_ret"].rolling(30).std()
@@ -61,10 +61,10 @@ price_result["bias_int10"] = price_result["vwap"] - price_result["int10"]
 price_result["bias_int20"] = price_result["vwap"] - price_result["int20"]
 price_result["bias_int30"] = price_result["vwap"] - price_result["int30"]
 
-writer = pd.ExcelWriter("price_result.xlsx")
+writer = pd.ExcelWriter("data/price_result.xlsx")
 with writer:
     price_result.to_excel(writer)
 
-writer = pd.ExcelWriter("btc_data.xlsx")
+writer = pd.ExcelWriter("data/btc_data.xlsx")
 with writer:
     btc_data.to_excel(writer)

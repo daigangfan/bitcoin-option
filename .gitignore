@@ -5,3 +5,4 @@ out/*
 *.docx
 *.pdf
 .vscode
+*/out

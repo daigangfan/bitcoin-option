@@ -5,8 +5,8 @@ import numpy as np
 from imply_vol import calc_imp_vol
 import datetime
 import re 
-price_result = pd.read_excel("price_result.xlsx")
-btc_data = pd.read_excel("btc_data.xlsx")
+price_result = pd.read_excel("data/price_result.xlsx")
+btc_data = pd.read_excel("data/btc_data.xlsx")
 
 price_result = pd.merge(left=price_result, right=btc_data[[
                         "Date", "skewness", "kurtosis", "log_ret"]], left_on="date", right_on="Date", how="left")
@@ -66,12 +66,12 @@ re_for_tabular=re.compile(r"\\begin{tabular}[\d\D]*\\end{tabular}")
 def cut(x):
     x=re_for_tabular.findall(x)[0]
     return x
-with open("regression_table.tex","w") as f:
+with open("drift/regression_table.tex","w") as f:
     tex=summaries.as_latex()
     tex=cut(tex)
     f.write(tex)
 
-writer=pd.ExcelWriter("price_result.xlsx")
+writer=pd.ExcelWriter("data/price_result.xlsx")
 with writer:
     price_result.to_excel(writer)
     
