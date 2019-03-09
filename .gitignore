@@ -6,3 +6,4 @@ out/*
 *.pdf
 .vscode
 */out
+*/__pycache__

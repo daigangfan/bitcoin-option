@@ -10,14 +10,6 @@ price_result["S/X"] = price_result["spot_price"] / price_result["strike"]
 btc_data = pd.read_excel("data/btc_data.xlsx")
 
 
-def get_time(x):
-    start_time = x["date"]
-    end_time = x["exp_date"]
-    return (end_time - start_time).days + 1
-
-
-price_result["time"] = price_result.apply(get_time, axis=1)
-
 btc_data["skewness"] = btc_data["log_ret"].rolling(30).skew()
 btc_data["kurtosis"] = btc_data["log_ret"].rolling(30).kurt()
 
