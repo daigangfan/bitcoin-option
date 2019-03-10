@@ -18,23 +18,38 @@ start_time = datetime.datetime(2017, 10, 17)
 btc_data = btc_data.query("Date>=@start_time")
 btc_describe = btc_data.describe()
 btc_describe.loc["count"] = btc_describe.loc["count"].astype(int)
+btc_describe=btc_describe[["Volume","log_ret","volatility","skewness","kurtosis"]]
 
-# TODO: 更改行列名，添加附注
-with open("describe_btc_data.tex", "w") as f:
+btc_describe.rename(columns={
+    "Volume":"成交量",
+    "log_ret":"对数收益率",
+    "volatility":"波动率",
+    "skewness":"偏度",
+    "kurtosis":"峰度"
+},inplace=True)
+
+
+with open("drift/describe_btc_data.tex", "w",encoding="utf-8") as f:
     f.write(btc_describe.to_latex(float_format="{:.2f}".format))
 
 option_initial_data = price_result.groupby("contract_label").first()
 
-# TODO:对期限的统计是否有意义，因为第一条数据未必是发行日，存在大量期限为1的数据
+
 option_describe = option_initial_data[["time", "strike"]].describe()
 
 option_describe.loc["count", "call_number"] = option_initial_data["contract_is_call"].value_counts()[
     1]
 option_describe.loc["count", "put_number"] = option_initial_data["contract_is_call"].value_counts()[
     0]
+option_describe.rename(columns={
+"time":"期限",
+"strike":"行权价",
+"call_number":"认购期权数量",
+"put_number":"认沽期权数量"
+},inplace=True)
 
 # TODO:更改行列名，添加附注
-with open("drift/describe_option_data.tex", "w") as f:
+with open("drift/describe_option_data.tex", "w",encoding="utf-8") as f:
     f.write(option_describe.to_latex(
         float_format=lambda x: "{:.2f}".format(x) if not isnan(x) else " "))
 

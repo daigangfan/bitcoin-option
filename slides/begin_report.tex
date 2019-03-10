@@ -3,6 +3,8 @@
 \usepackage{fontspec}
 \usepackage{cite}
 \usepackage[author-year]{amsrefs}
+\usepackage{booktabs}
+\usepackage{threeparttable}
 \setCJKmainfont{SimSun}
 \setmainfont{SimSun}
 \title{关于比特币期权的实证研究 }
@@ -74,9 +76,43 @@
 \section{数据与研究方法}
 \subsection{数据来源}
 \begin{frame}{数据来源}
-  期权交易数据来自data.ledgerx.com，已利用Python爬虫获取，包含该交易所2017年10月17日至2018年12月31日的全部期权交易数据。
-  比特币交易数据来自coinmarketcap.com，已利用Python爬虫获取，包含期权数据对应时间段内的比特币价格数据。
+  \begin{itemize}
+    \item 期权交易数据来自data.ledgerx.com，已利用Python爬虫获取，包含该交易所2017年10月17日至2018年12月31日的全部期权交易数据。
+    \item 比特币交易数据来自coinmarketcap.com，已利用Python爬虫获取，包含期权数据对应时间段内的比特币价格数据（属于对各大主要比特币市场加权得到的交易数据）。
+    \item 后续可能加入Deribit的期权交易数据进行对比研究。
+  \end{itemize}
 \end{frame}
+\subsection{部分数据统计描述}
+\begin{frame}[allowframebreaks]{部分数据统计描述}
+
+\begin{table}
+  \tiny
+  \caption{期权数据统计描述}
+  \begin{threeparttable}
+    \input{../drift/describe_option_data.tex}
+  \begin{tablenotes}
+    \tiny
+    \item[1] 此处将条款相同的期权合并统计，实际中同一条款的期权有多日的交易数据可用。
+    \item[2] 期权期限暂时近似用第一条交易数据出现日期为开始日期计算。
+  \end{tablenotes}
+  \end{threeparttable}
+  
+\end{table}
+\begin{table}
+  \tiny
+  \caption{比特币数据统计描述}
+  \begin{threeparttable}
+    \input{../drift/describe_btc_data.tex}
+  \begin{tablenotes}
+    \tiny
+    \item[1] 比特币的波动率、峰度、偏度暂时使用30天滚动窗口计算。
+    \item[2] 交易量用美元表示。
+  \end{tablenotes}
+  \end{threeparttable}
+  
+\end{table}
+\end{frame}
+
 \subsection{研究方法}
 \begin{frame}{研究方法}
   \begin{itemize}
