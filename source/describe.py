@@ -129,6 +129,8 @@ with open("drift/option_counts_group.tex", "w") as f:
     latex_str = latex_str.replace("[", "")
     latex_str = latex_str.replace(")", "")
     f.write(latex_str)
+price_result["time_cut"]=price_result["time_cut"].astype(str)
+price_result["moneyness_cut"]=price_result["moneyness_cut"].astype(str)
 writer = pd.ExcelWriter("data/price_result.xlsx")
 with writer:
     price_result.to_excel(writer)

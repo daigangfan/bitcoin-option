@@ -95,7 +95,7 @@ page = sess.get(
     "https://coinmarketcap.com/currencies/bitcoin/historical-data/?start=20170801&end=20190304")
 if page.status_code == 200:
     source = page.content
-    soup = BeautifulSoup(source)
+    soup = BeautifulSoup(source,features="lxml")
     table = soup.find("table", {"class": "table"})
     btc_data = pd.read_html(table.decode())[0]
     btc_data.rename(
