@@ -1,6 +1,6 @@
 \chapter{研究方法}
-    \section{期权的定价}
-    本文首先采用Black-Scholes模型\cite{10.2307/1831029}对比特币进行定价。Black-Scholes模型对交易资产及其市场有如下假设：
+    \section{期权的定价模型}
+    本文首先采用经典的Black-Scholes模型\cite{10.2307/1831029}对比特币进行定价。Black-Scholes模型对交易资产及其市场有如下假设：
     \begin{itemize}
         \item 存在已知且恒定的无风险收益率r。
         \item 资产价格为带漂移随机游走过程， 即$dS={\mu}Sdt+{\sigma}SdW$，其中价格波动率$\sigma$为已知的常数。可以推导出在这一假设下资产的收益率服从对数正态分布。
@@ -8,5 +8,39 @@
         \item 买卖期权和标的资产时不会产生交易费用和其他损失。
         \item 能够以无风险利率自由借入借出任意数量的资产。
         \item 对卖空操作无限制。
+        \item 不存在无风险套利机会。
+        \item 资产不支付红利。
     \end{itemize}
-    在以上假设下，市场上应当不存在无风险套利机会。可以得到如下的期权定价公式：
+    在以上假设下，可以得到如下的期权定价公式：
+    \begin{equation}\label{bs-call}
+            C=S*N(d_1)-X*e^{-rT}*N(d_2) 
+    \end{equation}
+    \begin{equation}\label{bs-put}
+        P=X*e^{-rT}*N(-d_2)-S*N(-d_1)
+    \end{equation}
+    其中
+    \begin{equation*}
+        \begin{split}
+        d_1=\frac{ln(S/X)+(r+\sigma^2/2)T}{\sigma{\sqrt{T}}} \\
+        d_2=\frac{ln(S/X)+(r-\sigma^2/2)T}{\sigma{\sqrt{T}}}
+        \end{split}
+    \end{equation*}
+    其中，C为看涨期权价格，P为看跌期权价格，S为标的资产价格，X为行权价格，r为无风险利率，T为距离到期日时间，$\sigma$为资产收益率的波动率。
+    
+    \section{波动率的估计}
+    现实中，市场上的真实波动率并非恒定且已知的，因而无法直接采用\ref{bs-call}\ref{bs-put}的公式对期权进行定价。主要可以采用如下几种方式对价格波动率进行估计。
+    \subsection{波动率滚动估计}
+    可以利用滚动窗口得到近期收益率的标准差估计，并将其作为期权到期日期前的期望波动率：
+    \begin{equation}\label{volatility-rolling}
+        \hat{\sigma}=\sum_{i=1}^{i=N}\frac{(r_{t-i}-\bar{r})^2}{N-1}
+    \end{equation}
+    其中$\bar{r}$为这一时期的平均收益率。
+    \subsection{加权隐含波动率估计}
+    从式\ref{bs-call}和\ref{bs-put}可以得出，期权的价格随波动率上升而上升。可以通过现在市场上的均衡期权价格得到一个$\sigma$的解，即为隐含波动率，这一预测方法利用了期权交易中的隐含信息。
+    根据参考文献\cite{CHIRAS1978213}，每日有多支期权且他们隐含波动率不同时，可以用以下公式获得当日的加权隐含波动率(WISD)：
+    \begin{equation}
+        WISD=\frac{\sum_{j=1}^{N}{ISD_j\frac{\partial{W_j}}{\partial{v_j}}\frac{v_j}{W_j}}}{\sum_{j=1}^{N}{\frac{\partial{W_j}}{\partial{v_j}}\frac{v_j}{W_j}}}
+    \end{equation}
+    其中 ， $WISD$为加权隐含波动率，$ISD_j$为第$j$个期权的隐含波动率，$N$为同一标的资产的期权个数，$\frac{\partial{W_j}}{\partial{v_j}}\frac{v_j}{W_j}$ 为期权价格相对于波动率的弹性。
+
+    
