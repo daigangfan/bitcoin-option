@@ -1,33 +1,15 @@
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 from math import sqrt, log, exp
 import numpy as np
 import scipy.stats as stats
 from collections import OrderedDict
-
+from dateutil.rrule import rrule, DAILY
 price_result = pd.read_excel("data/price_result.xlsx")
 filtered_result = pd.read_excel("data/filtered_price_result.xlsx")
 
 filtered_grouped = filtered_result.groupby("contract_label")
 btc_data = pd.read_excel("data/btc_data.xlsx")
-
-
-def get_BS_delta(x, ints=0.05):
-    spot_price = x["spot_price"]
-    strike_price = x["strike"]
-    ints = 0.05
-    maturity_date = x["exp_date"]
-    start_date = x["date"]
-    time = ((maturity_date-start_date).days+1)/365
-    option_type = x["contract_is_call"]
-    volatility = x["volatility"]*sqrt(365)
-    d1 = (log(spot_price/strike_price)+ints*time) /\
-        (volatility*sqrt(time))+0.5*(volatility*sqrt(time))
-
-    if option_type == "Call":
-        return stats.norm.cdf(d1)
-    else:
-        return stats.norm.cdf(d1)-1
 
 
 price_result_grouped = price_result.groupby("contract_label")
@@ -135,7 +117,7 @@ def get_return(x: OrderedDict):
         if item <= 0:
             net_out += exp(-0.05*(final_date-key).days/365)*abs(item)
     range1 = (final_date-start_date).days
-    return (((net_in-net_out)/net_out)/range1)*365
+    return (((net_in-net_out))/range1)*365
 
 
 returns = results.apply(get_return)
@@ -152,3 +134,82 @@ with open("drift/call_return_describe.tex", "w") as f:
 with open("drift/put_return_describe.tex", "w") as f:
     f.write(put_returns.describe().to_latex())
 
+
+def get_delta(spot_price, strike_price, time, option_type, volatility, ints=0.05):
+
+    d1 = (log(spot_price/strike_price)+ints*time) /\
+        (volatility*sqrt(time))+0.5*(volatility*sqrt(time))
+
+    if option_type:
+        return stats.norm.cdf(d1)
+    else:
+        return stats.norm.cdf(d1)-1
+
+
+# reset a btc data use date as index
+btc_date_data = btc_data.copy()
+btc_date_data.index = btc_data["Date"]
+
+
+def hedge_single(x: pd.Series, ints=0.05):
+    expire_price = btc_date_data.loc[x["exp_date"], "Price"]
+    strike = x["strike"]
+    used_btc_data = btc_date_data.loc[x["date"]:x["exp_date"]]
+
+    if x["contract_is_call"]:
+
+        end_pay = max(expire_price-strike, 0)
+    else:
+        end_pay = max(strike-expire_price, 0)
+    start_cost = x["vwap"]
+    spot_change = used_btc_data["Price"].shift(-1)-used_btc_data["Price"]
+    spot_change = spot_change.iloc[:-1]
+    # 获得delta
+    all_delta = []
+
+    for date in rrule(DAILY, dtstart=x["date"], until=x["exp_date"]-timedelta(days=1)):
+        spot = btc_date_data.loc[date, "Price"]
+        time = ((x["exp_date"]-date).days+1)/sqrt(365)
+        volatility = btc_date_data.loc[date, "volatility"]*sqrt(365)
+        delta = get_delta(spot, strike, time,
+                          x["contract_is_call"], volatility)
+        all_delta.append(delta)
+    delta_series = pd.Series(all_delta, index=spot_change.index)
+    time_series = delta_series.reset_index().index
+    hedge_cost = (delta_series*spot_change).sum()
+
+    interest_cost = (ints*(x["vwap"]-delta_series *
+                           used_btc_data["Price"].iloc[:-1])*time_series/365/x["time"]).sum()
+    if x["vwap"] < x["int5"]:
+        return end_pay-start_cost-hedge_cost-interest_cost
+    else:
+        return start_cost+hedge_cost+interest_cost-end_pay
+
+### test
+
+
+def trade_continuous(x: pd.DataFrame):
+    result= x.apply(hedge_single,axis=1)
+    result.index=x["date"]
+    return result
+
+#部分数据的到期日在此之后
+end_date=datetime(2019,3,4)
+new_filtered=filtered_result.query("exp_date<=@end_date")
+
+x=new_filtered.loc[new_filtered.date==datetime(2017,12,17),:].iloc[0]
+hedge_single(x)
+
+new_filtered_grouped=new_filtered.groupby("contract_label")
+continuous_result=new_filtered_grouped.apply(trade_continuous)
+writer=pd.ExcelWriter("data/BS_continuous_hedge.xlsx")
+
+call_part=continuous_result.filter(like="Call")
+put_part=continuous_result.filter(like="Put")
+with writer:
+    call_part.to_excel(writer,sheet_name="call")
+    put_part.to_excel(writer,sheet_name="put")
+with open("drift/call_continuous_return_describe.tex","w") as f:
+    f.write(call_part.describe().to_latex())
+with open("drift/put_continuous_return_describe.tex","w") as f:
+    f.write(put_part.describe().to_latex())

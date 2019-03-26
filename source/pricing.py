@@ -89,7 +89,7 @@ def get_BS_delta(x, ints=0.05):
     strike_price = x["strike"]
     
     
-    time = x["time"]
+    time = x["time"]/365
     option_type = x["contract_is_call"]
     volatility = x["volatility"]*sqrt(365)
     d1 = (log(spot_price/strike_price)+ints*time) /\
