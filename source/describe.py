@@ -58,7 +58,7 @@ with open("drift/describe_option_data.tex", "w",encoding="utf-8") as f:
 price_result["time_cut"] = pd.cut(
     price_result["time"], [0, 20, 80, 180, 637], right=False)
 price_result["moneyness_cut"] = pd.cut(
-    price_result["S/X"], [0, 0.6, 0.8, 1.2, 3.8], right=False)
+    price_result["S/X"], [0, 0.6, 0.9, 1.1, 3.8], right=False)
 
 price_biases = price_result.filter(regex=r"^bias_int\d+", axis=1)
 price_result[["abs_bias_int5", "abs_bias_int10", "abs_bias_int20",

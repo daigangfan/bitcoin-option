@@ -1,6 +1,6 @@
 import pandas as pd
 from datetime import datetime
-from math import sqrt, log,exp
+from math import sqrt, log, exp
 import numpy as np
 import scipy.stats as stats
 from collections import OrderedDict
@@ -54,7 +54,7 @@ def trade_delta(x: pd.DataFrame, add_gamma=False):
             continue
         if not(check_data.date == x_copy.date).any():
             continue
-        delta = get_BS_delta(x_copy)
+        delta = x_copy["delta_5"]
         weights = delta
         # 倒数第二条之前
         if ind+1 < x.shape[0] and x.iloc[ind+1]["date"] <= datetime(2018, 12, 31):
@@ -142,3 +142,13 @@ returns = results.apply(get_return)
 returns = returns.dropna()
 call_returns = returns.loc[returns.index.str.contains("Call")]
 put_returns = returns.loc[returns.index.str.contains("Put")]
+writer = pd.ExcelWriter("data/returns_plainBS.xlsx")
+with writer:
+    call_returns.to_excel(writer, sheet_name="call")
+    put_returns.to_excel(writer, sheet_name="put")
+
+with open("drift/call_return_describe.tex", "w") as f:
+    f.write(call_returns.describe().to_latex())
+with open("drift/put_return_describe.tex", "w") as f:
+    f.write(put_returns.describe().to_latex())
+

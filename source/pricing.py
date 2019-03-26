@@ -67,6 +67,10 @@ price_result["bias_int10"] = price_result["vwap"] - price_result["int10"]
 price_result["bias_int20"] = price_result["vwap"] - price_result["int20"]
 price_result["bias_int30"] = price_result["vwap"] - price_result["int30"]
 
+price_result["relative_bias_int5"]=price_result["bias_int5"]/price_result["vwap"]
+price_result["relative_bias_int10"]=price_result["bias_int10"]/price_result["vwap"]
+price_result["relative_bias_int20"]=price_result["bias_int20"]/price_result["vwap"]
+price_result["relative_bias_int30"]=price_result["bias_int30"]/price_result["vwap"]
 
 def check_bound(x, r=0.05):
     price = x["vwap"]
@@ -77,6 +81,26 @@ def check_bound(x, r=0.05):
 
 
 price_result["is_inbound"] = price_result.apply(check_bound,axis=1)
+
+# calculate delta 
+
+def get_BS_delta(x, ints=0.05):
+    spot_price = x["spot_price"]
+    strike_price = x["strike"]
+    
+    
+    time = x["time"]
+    option_type = x["contract_is_call"]
+    volatility = x["volatility"]*sqrt(365)
+    d1 = (log(spot_price/strike_price)+ints*time) /\
+        (volatility*sqrt(time))+0.5*(volatility*sqrt(time))
+
+    if option_type:
+        return norm.cdf(d1)
+    else:
+        return norm.cdf(d1)-1
+
+price_result["delta_5"]=price_result.apply(get_BS_delta,axis=1)
 
 writer = pd.ExcelWriter("data/price_result.xlsx")
 with writer:

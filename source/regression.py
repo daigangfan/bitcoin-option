@@ -12,7 +12,6 @@ price_result = pd.merge(left=price_result, right=btc_data[[
                         "Date", "skewness", "kurtosis", "log_ret"]], left_on="date", right_on="Date", how="left")
 price_result.drop(columns=["Date"], inplace=True)
 
-# FIXME: 这里计算隐含波动率的有问题
 price_result["imply_vol"] = price_result.apply(calc_imp_vol, axis=1)
 price_result["contract_is_call"] = price_result["contract_is_call"].astype(int)
 
@@ -31,22 +30,19 @@ def get_vol_pre(x):
 
 price_result["vol_pre"] = price_result.apply(get_vol_pre,axis=1)
 
-# TODO: 计算Lambda 的方法？
-btc_data["lambda"]=btc_data["log_ret"].diff()/btc_data["Volume"].apply(np.log).diff()
 
-price_result["lambda"]=pd.merge(price_result,btc_data,how='left',left_on="date",right_on="Date")["lambda"]
 price_result["amihud"]=np.abs(np.log(price_result["volume"]).divide(price_result["log_ret"]))
 price_result["spread"]=price_result["last_ask"]-price_result["last_bid"]
 
-used_data=price_result[["S/X","time","vol_pre","log_ret","volatility","skewness","lambda","amihud","spread","open_interest","contract_is_call","bias_int5","abs_bias_int5"]]
+used_data=price_result[["S/X","time","vol_pre","log_ret","volatility","skewness","amihud","spread","open_interest","contract_is_call","bias_int5","abs_bias_int5"]]
 used_data=used_data.dropna()
 used_data = used_data.loc[-np.isinf(used_data.amihud)]
-used_data = used_data.loc[-np.isinf(used_data["lambda"])]
-X = used_data[["S/X", "time", "vol_pre", "log_ret", "volatility", "skewness", "lambda", "amihud", "spread",
+
+X = used_data[["S/X", "time", "vol_pre", "log_ret", "volatility", "skewness",  "amihud", "spread",
                "open_interest","contract_is_call"]]
-X["time"]=np.log(X["time"])
-X["inter_call_money"]=X["contract_is_call"]*X["S/X"]
-X["inter_skewness"]=X["contract_is_call"]*X["skewness"]
+X.loc[:,"time"]=np.log(X["time"])
+X.loc[:,"inter_call_money"]=X["contract_is_call"]*X["S/X"]
+X.loc[:,"inter_skewness"]=X["contract_is_call"]*X["skewness"]
 X=sts.add_constant(X)
 y1=used_data["bias_int5"]
 y2=used_data["abs_bias_int5"]
