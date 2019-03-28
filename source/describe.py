@@ -133,8 +133,8 @@ price_result["time_cut"]=price_result["time_cut"].astype(str)
 price_result["moneyness_cut"]=price_result["moneyness_cut"].astype(str)
 writer = pd.ExcelWriter("data/price_result.xlsx")
 with writer:
-    price_result.to_excel(writer)
+    price_result.to_excel(writer,index=False)
 
 writer = pd.ExcelWriter("data/btc_data.xlsx")
 with writer:
-    btc_data.to_excel(writer)
+    btc_data.to_excel(writer,index=False)

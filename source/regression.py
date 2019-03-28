@@ -69,5 +69,5 @@ with open("drift/regression_table.tex","w") as f:
 
 writer=pd.ExcelWriter("data/price_result.xlsx")
 with writer:
-    price_result.to_excel(writer)
+    price_result.to_excel(writer,index=False)
     

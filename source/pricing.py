@@ -104,8 +104,8 @@ price_result["delta_5"]=price_result.apply(get_BS_delta,axis=1)
 
 writer = pd.ExcelWriter("data/price_result.xlsx")
 with writer:
-    price_result.to_excel(writer)
+    price_result.to_excel(writer,index=False)
 
 writer = pd.ExcelWriter("data/btc_data.xlsx")
 with writer:
-    btc_data.to_excel(writer)
+    btc_data.to_excel(writer,index=False)

@@ -126,8 +126,8 @@ call_returns = returns.loc[returns.index.str.contains("Call")]
 put_returns = returns.loc[returns.index.str.contains("Put")]
 writer = pd.ExcelWriter("data/returns_plainBS.xlsx")
 with writer:
-    call_returns.to_excel(writer, sheet_name="call")
-    put_returns.to_excel(writer, sheet_name="put")
+    call_returns.to_excel(writer, sheet_name="call",index=False)
+    put_returns.to_excel(writer, sheet_name="put",index=False)
 
 with open("drift/call_return_describe.tex", "w") as f:
     f.write(call_returns.describe().to_latex())
@@ -207,8 +207,8 @@ writer=pd.ExcelWriter("data/BS_continuous_hedge.xlsx")
 call_part=continuous_result.filter(like="Call")
 put_part=continuous_result.filter(like="Put")
 with writer:
-    call_part.to_excel(writer,sheet_name="call")
-    put_part.to_excel(writer,sheet_name="put")
+    call_part.to_excel(writer,sheet_name="call",index=False)
+    put_part.to_excel(writer,sheet_name="put",index=False)
 with open("drift/call_continuous_return_describe.tex","w") as f:
     f.write(call_part.describe().to_latex())
 with open("drift/put_continuous_return_describe.tex","w") as f:

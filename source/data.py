@@ -88,7 +88,7 @@ results["time"] = results.apply(get_time, axis=1)
 
 writer = pd.ExcelWriter("data/ledgerx_data.xlsx")
 with writer:
-    results.to_excel(writer)
+    results.to_excel(writer,index=False)
 
 # get bitcoin data from coinmarketcap,move all preprocessing for btc_data here
 page = sess.get(
@@ -113,4 +113,4 @@ btc_data["log_ret"] = pd.Series(np.log(btc_data["Price"])).diff()
 
 writer = pd.ExcelWriter("data/btc_data.xlsx")
 with writer:
-    btc_data.to_excel(writer)
+    btc_data.to_excel(writer,index=False)
