@@ -42,5 +42,24 @@
         WISD=\frac{\sum_{j=1}^{N}{ISD_j\frac{\partial{W_j}}{\partial{v_j}}\frac{v_j}{W_j}}}{\sum_{j=1}^{N}{\frac{\partial{W_j}}{\partial{v_j}}\frac{v_j}{W_j}}}
     \end{equation}
     其中 ， $WISD$为加权隐含波动率，$ISD_j$为第$j$个期权的隐含波动率，$N$为同一标的资产的期权个数，$\frac{\partial{W_j}}{\partial{v_j}}\frac{v_j}{W_j}$ 为期权价格相对于波动率的弹性。
+    \subsection{GARCH模型}
 
-    
+    \section{对定价偏差的解释}
+    波动率微笑现象反映出了期权的隐含波动率和价值程度的关系，同理我们可以探究很多变量对于期权真实价格与理论价格之间偏差的系统性影响。本文构建了如下的回归模型:
+    \begin{equation}
+        \begin{split}
+        &diff=\alpha+\beta_1{moneyness}+\beta_2{time}+\beta_3{vol_pre}+\\
+        &\beta_4{volatility}+\beta_5{skewness}+\beta_6{amihud}+\beta_7{spread}+\beta_8{Call}+\beta_9{Call*moneyness}+\beta_10{Call*skewness}
+        \end{split}
+    \end{equation}
+    其中，moneyness表示期权的价值程度（当前资产价格/行权价），time表示距离到期期限，vol\_pre表示波动率溢价，volatility表示估计得到的已实现波动率，skewness表示偏度，amihud表示Amihud提出的非流动性指标，spread表示期权的买卖价差。Call为指示变量，表示是否为看涨期权。
+    Amihud非流动性指标由Amihud于2002年提出\cite{Yako-2002}。表示形式如下：
+    \begin{equation}
+        Amihud=\frac{1}{d}\sum_{i=1}^{d}{(\frac{|ret|}{Volume})}
+    \end{equation}
+    其中ret表示当日收益率，Volume表示当日交易量，这一指标衡量了交易量对价格波动的冲击程度，是一种较好的流动性指标。
+    \section{套利策略}
+    B-S模型是基于用股票和无风险债券复制期权而没有套利空间的原理推导出来的。由此我们可以思考，是否可以利用实际价格与模型价格偏离的部分，构建套利策略，这一策略将反映出B-S模型中包含的信息价值。策略详情如下：
+    \begin{itemize}
+        \item 每日构建资产组合，卖出实际加权均价高于模型价格的期权并买入$\delta$份比特币
+    \end{itemize}
