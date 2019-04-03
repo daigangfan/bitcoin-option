@@ -57,14 +57,14 @@ exchanges_price_data.index=exchanges_price_data["Time"]
 exchanges_price_data.index=exchanges_price_data.index.date
 btc_data["maxmin_ratio"]=exchanges_price_data["max"].loc[btc_data.index.date]/exchanges_price_data["min"].loc[btc_data.index.date]
 price_result["maxmin_ratio"]=btc_data["maxmin_ratio"].loc[pd.DatetimeIndex(price_result["date"]).date].values
-used_data=price_result[["S/X","time","vol_pre","log_ret","volatility","skewness","amihud","spread","open_interest","contract_is_call","bias_int5","abs_bias_int5","maxmin_ratio"]]
+used_data=price_result[["delta_5","time","vol_pre","log_ret","volatility","skewness","amihud","spread","open_interest","contract_is_call","bias_int5","abs_bias_int5","maxmin_ratio"]]
 used_data=used_data.dropna()
-used_data = used_data.loc[-np.isinf(used_data.amihud)]
+used_data = used_data.loc[-np.isinf(used._data.amihud)]
 
-X = used_data[["S/X", "time", "vol_pre", "log_ret", "volatility", "skewness",  "amihud", "spread",
+X = used_data[["delta_5", "time", "vol_pre", "log_ret", "volatility", "skewness",  "amihud", "spread",
                "open_interest","contract_is_call","maxmin_ratio"]]
 X.loc[:,"time"]=np.log(X["time"])
-X.loc[:,"inter_call_money"]=X["contract_is_call"]*X["S/X"]
+X.loc[:,"inter_call_money"]=X["contract_is_call"]*X["delta_5"]
 X.loc[:,"inter_skewness"]=X["contract_is_call"]*X["skewness"]
 X=sts.add_constant(X)
 y1=used_data["bias_int5"]
