@@ -5,6 +5,8 @@ import numpy as np
 from imply_vol import calc_imp_vol
 import datetime
 import re 
+from math import log,exp,sqrt
+from scipy.stats import norm
 price_result = pd.read_excel("data/price_result.xlsx")
 btc_data = pd.read_excel("data/btc_data.xlsx")
 
@@ -15,8 +17,23 @@ price_result.drop(columns=["Date"], inplace=True)
 price_result["imply_vol"] = price_result.apply(calc_imp_vol, axis=1)
 price_result["contract_is_call"] = price_result["contract_is_call"].astype(int)
 
-# TODO: 计算波动率溢价时对于超过11月2日数据的两种选择：①：将波动率截止到11月2日（现在存在一定问题） ②：去掉到期日在11月2日之后的数据。
-# 30天以内的波动率用30天的窗口计算
+
+def get_implied_vega(x,ints=0.05):
+    spot_price=x["spot_price"]
+    strike_price=x["strike"]
+    time=x["time"]/365
+    volatility=x["imply_vol"]
+    d1=(log(spot_price/strike_price)+ints*time) /\
+        (volatility*sqrt(time))+0.5*(volatility*sqrt(time))
+    result=spot_price*norm.pdf(d1)*sqrt(time)
+    return result
+price_result["imply_vega"]=price_result.apply(get_implied_vega,axis=1)
+def get_weighted_ISD(x:pd.DataFrame):
+    elasticity=x["imply_vega"]*x["imply_vol"]/x["vwap"]
+    return (x["imply_vol"]*elasticity).sum()/elasticity.sum()
+daily_weighted_ISD=price_result.groupby("date").apply(get_weighted_ISD)
+btc_data.index=btc_data["Date"]
+btc_data["weighted_ISD"]=daily_weighted_ISD
 
 
 def get_vol_pre(x):
@@ -70,4 +87,7 @@ with open("drift/regression_table.tex","w") as f:
 writer=pd.ExcelWriter("data/price_result.xlsx")
 with writer:
     price_result.to_excel(writer,index=False)
-    
+
+writer=pd.ExcelWriter("data/btc_data.xlsx")
+with writer:
+    btc_data.to_excel(writer,index=False)
