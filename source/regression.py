@@ -9,10 +9,10 @@ from math import log,exp,sqrt
 from scipy.stats import norm
 price_result = pd.read_excel("data/price_result.xlsx")
 btc_data = pd.read_excel("data/btc_data.xlsx")
-
-price_result = pd.merge(left=price_result, right=btc_data[[
+if "skewness" not in price_result.columns:
+    price_result = pd.merge(left=price_result, right=btc_data[[
                         "Date", "skewness", "kurtosis", "log_ret"]], left_on="date", right_on="Date", how="left")
-price_result.drop(columns=["Date"], inplace=True)
+    price_result.drop(columns=["Date"], inplace=True)
 
 price_result["imply_vol"] = price_result.apply(calc_imp_vol, axis=1)
 price_result["contract_is_call"] = price_result["contract_is_call"].astype(int)
@@ -43,20 +43,26 @@ def get_vol_pre(x):
         return x["imply_vol"]/np.sqrt(365)-btc_data.query("Date<=@end_date").iloc[-1].volatility
     btc_range = btc_data.query("Date<=@end_date and Date>=@start_date")
     return x["imply_vol"]/np.sqrt(365)-btc_range["log_ret"].std()
-
-
 price_result["vol_pre"] = price_result.apply(get_vol_pre,axis=1)
 
 
 price_result["amihud"]=np.abs(np.log(price_result["volume"]).divide(price_result["log_ret"]))
 price_result["spread"]=price_result["last_ask"]-price_result["last_bid"]
 
-used_data=price_result[["S/X","time","vol_pre","log_ret","volatility","skewness","amihud","spread","open_interest","contract_is_call","bias_int5","abs_bias_int5"]]
+# get highest across exchanges
+exchanges_price_data=pd.read_excel("data/bitcoinity_data.xlsx")
+exchanges_price_data["max"]=exchanges_price_data.max(axis=1)
+exchanges_price_data["min"]=exchanges_price_data.min(axis=1)
+exchanges_price_data.index=exchanges_price_data["Time"]
+exchanges_price_data.index=exchanges_price_data.index.date
+btc_data["maxmin_ratio"]=exchanges_price_data["max"].loc[btc_data.index.date]/exchanges_price_data["min"].loc[btc_data.index.date]
+price_result["maxmin_ratio"]=btc_data["maxmin_ratio"].loc[pd.DatetimeIndex(price_result["date"]).date].values
+used_data=price_result[["S/X","time","vol_pre","log_ret","volatility","skewness","amihud","spread","open_interest","contract_is_call","bias_int5","abs_bias_int5","maxmin_ratio"]]
 used_data=used_data.dropna()
 used_data = used_data.loc[-np.isinf(used_data.amihud)]
 
 X = used_data[["S/X", "time", "vol_pre", "log_ret", "volatility", "skewness",  "amihud", "spread",
-               "open_interest","contract_is_call"]]
+               "open_interest","contract_is_call","maxmin_ratio"]]
 X.loc[:,"time"]=np.log(X["time"])
 X.loc[:,"inter_call_money"]=X["contract_is_call"]*X["S/X"]
 X.loc[:,"inter_skewness"]=X["contract_is_call"]*X["skewness"]
