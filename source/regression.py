@@ -59,7 +59,7 @@ btc_data["maxmin_ratio"]=exchanges_price_data["max"].loc[btc_data.index.date]/ex
 price_result["maxmin_ratio"]=btc_data["maxmin_ratio"].loc[pd.DatetimeIndex(price_result["date"]).date].values
 used_data=price_result[["delta_5","time","vol_pre","log_ret","volatility","skewness","amihud","spread","open_interest","contract_is_call","bias_int5","abs_bias_int5","maxmin_ratio"]]
 used_data=used_data.dropna()
-used_data = used_data.loc[-np.isinf(used._data.amihud)]
+used_data = used_data.loc[-np.isinf(used_data.amihud)]
 
 X = used_data[["delta_5", "time", "vol_pre", "log_ret", "volatility", "skewness",  "amihud", "spread",
                "open_interest","contract_is_call","maxmin_ratio"]]
