@@ -1,13 +1,22 @@
 
-\documentclass[degree=bachelor]{thuthesis}
+\documentclass[degree=bachelor,pifootnote]{thuthesis}
 \usepackage{thuthesis}
 \usepackage{booktabs}
 
 \begin{document}
+% 封面
+% \frontmatter
+% \input{chapters/cover}
+% \makecover
+\tableofcontents
+\mainmatter
 %引言
-\input{chapters/introduction.tex}
+\input{chapters/1_introduction.tex}
+%数据
+\input{chapters/2_data.tex}
 % 研究方法
-\input{chapters/research_method.tex}
-\bibliographystyle{plain}
+\input{chapters/3_research_method.tex}
+\bibliographystyle{thuthesis-author-year}
 \bibliography{paperbib}
+
 \end{document}
