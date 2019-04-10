@@ -92,7 +92,7 @@ with writer:
 
 # get bitcoin data from coinmarketcap,move all preprocessing for btc_data here
 page = sess.get(
-    "https://coinmarketcap.com/currencies/bitcoin/historical-data/?start=20170801&end=20190304")
+    "https://coinmarketcap.com/currencies/bitcoin/historical-data/?start=20160801&end=20190304")
 if page.status_code == 200:
     source = page.content
     soup = BeautifulSoup(source,features="lxml")

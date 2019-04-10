@@ -13,6 +13,8 @@ btc_data = pd.read_excel("data/btc_data.xlsx")
 btc_data["skewness"] = btc_data["log_ret"].rolling(30).skew()
 btc_data["kurtosis"] = btc_data["log_ret"].rolling(30).kurt()
 
+btc_data["skewness_60"]=btc_data["log_ret"].rolling(60).skew()
+btc_data["kurtosis_60"]=btc_data["log_ret"].rolling(60).kurt()
 
 start_time = datetime.datetime(2017, 10, 17)
 btc_data = btc_data.query("Date>=@start_time")

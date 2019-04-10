@@ -7,6 +7,7 @@ import datetime
 import re
 from math import log, exp, sqrt
 from scipy.stats import norm
+from statsmodels.formula import api as stf
 price_result = pd.read_excel("data/price_result.xlsx")
 btc_data = pd.read_excel("data/btc_data.xlsx")
 if "skewness" not in price_result.columns:
@@ -37,9 +38,23 @@ def get_weighted_ISD(x: pd.DataFrame):
     return (x["imply_vol"]*elasticity).sum()/elasticity.sum()
 
 
+def get_slope(x:pd.DataFrame):
+    if x.size>=2:
+        try:
+            model=stf.ols("imply_vol~delta_5",data=x,hasconst=True)
+            model_result=model.fit()
+            return model_result.params[1]
+        except Exception:
+            return float("nan")
+    else:
+        return float("nan")
+
 daily_weighted_ISD = price_result.groupby("date").apply(get_weighted_ISD)
+daily_volatility_slope=price_result.groupby("date").apply(get_slope)
+price_result["slope"]=daily_volatility_slope.loc[price_result["date"]].values
 btc_data.index = btc_data["Date"]
 btc_data["weighted_ISD"] = daily_weighted_ISD
+
 
 
 def get_vol_pre(x):
@@ -69,12 +84,12 @@ btc_data["maxmin_ratio"] = exchanges_price_data["max"].loc[btc_data.index.date] 
 price_result["maxmin_ratio"] = btc_data["maxmin_ratio"].loc[pd.DatetimeIndex(
     price_result["date"]).date].values
 used_data = price_result[["delta_5", "time", "vol_pre", "log_ret", "volatility", "skewness", "amihud",
-                          "spread", "open_interest", "contract_is_call", "bias_int5", "abs_bias_int5", "maxmin_ratio"]]
+                          "spread", "open_interest", "contract_is_call", "bias_int5", "abs_bias_int5", "maxmin_ratio","slope"]]
 used_data = used_data.dropna()
 used_data = used_data.loc[-np.isinf(used_data.amihud)]
 
 X = used_data[["delta_5", "time", "vol_pre", "log_ret", "volatility", "skewness",  "amihud", "spread",
-               "open_interest", "contract_is_call", "maxmin_ratio"]]
+               "open_interest", "contract_is_call", "maxmin_ratio","slope"]]
 X.loc[:, "time"] = np.log(X["time"])
 X.loc[:, "inter_call_money"] = X["contract_is_call"]*X["delta_5"]
 X.loc[:, "inter_skewness"] = X["contract_is_call"]*X["skewness"]
@@ -89,7 +104,7 @@ result = model.fit()
 # result_robust.summary()
 model2 = sts.OLS(y2, X)
 result2 = model2.fit()
-result2
+
 # result2_robust=model2.fit(cov_type="hc1")
 # result2_robust.summary()
 summaries = summary_col([result, result2], stars=True, info_dict={
@@ -114,3 +129,6 @@ with writer:
 writer = pd.ExcelWriter("data/btc_data.xlsx")
 with writer:
     btc_data.to_excel(writer, index=False)
+
+
+
