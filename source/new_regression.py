@@ -185,3 +185,15 @@ with open("drift/regression_table.tex", "w") as f:
     tex = summaries.as_latex()
     tex = cut(tex)
     f.write(tex)
+
+
+writer = pd.ExcelWriter("data/price_result.xlsx")
+with writer:
+    price_result.to_excel(writer, index=False)
+
+writer = pd.ExcelWriter("data/btc_data.xlsx")
+with writer:
+    btc_data.to_excel(writer, index=False)
+
+
+

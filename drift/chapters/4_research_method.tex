@@ -1,4 +1,4 @@
-\chapter{研究方法}\label{research_method}
+\chapter{实证研究方法}\label{research_method}
     \section{期权的定价模型}
     本文首先采用Black-Scholes模型对比特币进行定价。Black-Scholes模型对交易资产及其市场有如下假设：
     \begin{itemize}
@@ -27,10 +27,16 @@
     \end{equation*}
     其中，C为看涨期权价格，P为看跌期权价格，S为标的资产价格，X为行权价格，r为无风险利率，T为距离到期日时间，$\sigma$为资产收益率的波动率。
     
+        比起股票或其他传统金融资产，比特币市场一定程度上更符合Black-Scholes模型的假设，也更利于进行推导模型时构建的delta-对冲过程：
+        \begin{itemize}
+            \item 比特币为连续交易，无假日和休市时间，可以在任意时间买卖。
+            \item 比特币可以分割成（足够小的）任意单位买卖，而非必须整数。
+        \end{itemize}
+
     \section{波动率的估计}
     现实中，市场上的真实波动率并非恒定且已知的，因而无法直接采用\ref{bs-call}\ref{bs-put}的公式对期权进行定价。主要可以采用如下几种方式对价格波动率进行估计。
     \subsection{波动率滚动估计}
-    可以利用滚动窗口得到近期收益率的标准差估计，并将其作为期权到期日期前的期望波动率：
+    投资者在市场上直接观察到的是近期一段时间比特币价格的波动。可以利用滚动窗口得到近期收益率的标准差估计，并将其作为期权到期日期前的期望波动率：
     \begin{equation}\label{volatility-rolling}
         \hat{\sigma}=\sum_{i=1}^{i=N}\frac{(r_{t-i}-\bar{r})^2}{N-1}
     \end{equation}
@@ -42,24 +48,33 @@
         WISD=\frac{\sum_{j=1}^{N}{ISD_j\frac{\partial{W_j}}{\partial{v_j}}\frac{v_j}{W_j}}}{\sum_{j=1}^{N}{\frac{\partial{W_j}}{\partial{v_j}}\frac{v_j}{W_j}}}
     \end{equation}
     其中 ， $WISD$为加权隐含波动率，$ISD_j$为第$j$个期权的隐含波动率，$N$为同一标的资产的期权个数，$\frac{\partial{W_j}}{\partial{v_j}}\frac{v_j}{W_j}$ 为期权价格相对于波动率的弹性。
-    \subsection{GARCH模型}
-
+    
     \section{对定价偏差的解释}
-    波动率微笑现象反映出了期权的隐含波动率和价值程度的关系，同理我们可以探究很多变量对于期权真实价格与理论价格之间偏差的系统性影响。本文构建了如下的回归模型:
-    \begin{equation}
-        \begin{split}
-        &diff=\alpha+\beta_1{moneyness}+\beta_2{time}+\beta_3{vol_pre}+\\
-        &\beta_4{volatility}+\beta_5{skewness}+\beta_6{amihud}+\beta_7{spread}+\beta_8{Call}+\beta_9{Call*moneyness}+\beta_10{Call*skewness}
-        \end{split}
-    \end{equation}
-    其中，moneyness表示期权的价值程度（当前资产价格/行权价），time表示距离到期期限，vol\_pre表示波动率溢价，volatility表示估计得到的已实现波动率，skewness表示偏度，amihud表示Amihud提出的非流动性指标，spread表示期权的买卖价差。Call为指示变量，表示是否为看涨期权。
-    Amihud非流动性指标由Amihud于2002年提出\cite{Yako-2002}。表示形式如下：
-    \begin{equation}
-        Amihud=\frac{1}{d}\sum_{i=1}^{d}{(\frac{|ret|}{Volume})}
-    \end{equation}
-    其中ret表示当日收益率，Volume表示当日交易量，这一指标衡量了交易量对价格波动的冲击程度，是一种较好的流动性指标。
+    波动率微笑现象反映出了期权的隐含波动率和其价值程度（即资产价格与行权价之比）存在规律性的关系，同理我们可以探究很多变量对于期权真实价格与模型价格之间偏差的系统性影响。通过构建回归模型并对变量的系数进行分析，我们可以识别不同因素对真实价格偏离部分的影响的方向，并对其做出解释。这些变量主要分为两个方面：比特币市场因素和期权因素。
+    \subsection{比特币市场有关变量}
+    \begin{itemize}
+        \item LR 比特币市场对数收益率
+        \item STD 比特币历史波动率
+        \item SKEW 比特币历史偏度
+        \item AMI Amihud非流动性指标
+        \item BTC\_VOL 比特币市场总交易量
+        \item MR 当日比特币交易所中价格最高者和最低者之比
+    \end{itemize}
+    
+    这些指标衡量了比特币市场的市场环境。如波动率和偏度反映了投资者所处的风险情况，同时也属于识别出的模型设定问题，而非流动性指标和MR体现了市场的流动性情况，这些都可能造成真实价格同模型价格之间的偏差。
+    \subsection{期权自身有关变量}
+    \begin{itemize}
+        \item DELTA 期权根据Black-Scholes模型计算出的delta
+        \item TIME 期权距离到期日的时间
+        \item VP 期权的波动率溢价（Volatility Premimum），利用该期权当时的隐含波动率与当天至到期日之间的实现波动率之差计量。
+        \item VOL 期权当天交易量                                     
+        \item SPR 期权当天公开的买卖价差
+        \item OI 期权当天公开的持仓量（open interest）
+        \item CALL 哑变量，是否为认购期权，1为认购期权，0为认沽期权。 
+    \end{itemize}
+    这些指标能够衡量期权自身性质对真实价格的影响，主要是不同性质的期权可能导致投资者对其供给和需求的不平衡会造成期权价格的偏离。
     \section{套利策略}
     B-S模型是基于用股票和无风险债券复制期权而没有套利空间的原理推导出来的。由此可以利用实际价格与模型价格偏离的部分，构建套利策略，这一策略将反映出B-S模型中包含的信息价值。策略详情如下：
     \begin{itemize}
-        \item 每日构建资产组合，卖出实际加权均价高于模型价格的期权并买入$\delta$份比特币
+        
     \end{itemize}
