@@ -1,6 +1,38 @@
 \documentclass{article}
+\usepackage{ctex}
 \usepackage{booktabs}
+\usepackage{threeparttable}
+\usepackage{graphicx}
+\usepackage{lscape}
+\usepackage{rotating}
+\usepackage{geometry}
 %used for some quick output
 \begin{document}
-    \input{regression_table.tex}
+    \begin{table}
+        \rotatebox[]{90}{
+            \input{independent_variables_corr.tex}
+        }
+    \end{table}
+    \newpage
+    \begin{itemize}
+        \item bias\_int\_5: 利率为5下，实际价格-理论价格
+        \item abs\_bias\_int5: 利率为5下实际价格与理论价格差异的绝对值。
+        \item cons:常数项；
+        \item delta\_5:利率为5$\%$下delta；
+        \item time:距离到期日的时间；
+        \item vol\_pre:波动率溢价（到期日时实现波动率-隐含波动率）；
+        \item log\_ret：当日比特币收益率；
+        \item volatility：滚动计算历史波动率；
+        \item skewness：滚动计算偏度；
+        \item amihud：amihud非流动性指标；
+        \item spread：当日最后一次买卖价差；
+        \item open\_interest：期权持仓量；
+        \item contract\_is\_call:是否为看涨期权；
+        \item maxmin\_ratio:当日交易所最高价与最低价之比；
+        \item slope:当日波动率倾斜曲面的斜率；
+        \item inter\_call\_money:哑变量contract\_is\_call与moneyness的交互项；
+        \item inter\_skewness:哑变量contract\_is\_call与skewness的交互项；
+    \end{itemize}
+
+    
 \end{document}

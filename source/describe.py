@@ -4,7 +4,7 @@ import datetime
 import pandas as pd
 
 from math import isnan
-
+import numpy as np 
 price_result = pd.read_excel("data/price_result.xlsx")
 price_result["S/X"] = price_result["spot_price"] / price_result["strike"]
 btc_data = pd.read_excel("data/btc_data.xlsx")
@@ -15,7 +15,8 @@ btc_data["kurtosis"] = btc_data["log_ret"].rolling(30).kurt()
 
 btc_data["skewness_60"]=btc_data["log_ret"].rolling(60).skew()
 btc_data["kurtosis_60"]=btc_data["log_ret"].rolling(60).kurt()
-
+btc_data["amihud"]=np.abs(btc_data["log_ret"])/np.log(btc_data["Volume"])
+btc_data["amihud"]=btc_data["amihud"].rolling(30,min_periods=1).sum()
 start_time = datetime.datetime(2017, 10, 17)
 btc_data = btc_data.query("Date>=@start_time")
 btc_describe = btc_data.describe()

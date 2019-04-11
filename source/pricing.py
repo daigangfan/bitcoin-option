@@ -9,7 +9,7 @@ btc_data = pd.read_excel("data/btc_data.xlsx")
 
 # TODO:波动率的计算，用`rolling`的方式包含今日，是否合适？
 btc_data["volatility"] = btc_data["log_ret"].rolling(30).std()
-
+btc_data["volatility_60"] = btc_data["log_ret"].rolling(60).std()
 # TODO:波动率窗口的选择（如何确定30天窗口是比较好的？）
 
 
