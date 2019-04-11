@@ -61,8 +61,8 @@ price_result["amihud"]=btc_data["amihud"].loc[pd.DatetimeIndex(price_result["dat
 money_cut_more=pd.cut(price_result["S/X"],[0, 0.3,0.6, 0.9,1.1,1.4,2.0,3.9],right=True)
 mean_isd=price_result.groupby(money_cut_more)["imply_vol"].mean()
 mean_isd.index=pd.Series(mean_isd.index).apply(lambda x:(x.left+x.right)/2).astype("double")
-mean_isd[price_result["S/X"].min()-0.0001]=price_result["imply_vol"].loc[price_result["S/X"].argmin()]
-mean_isd[price_result["S/X"].max()]=price_result["imply_vol"].loc[price_result["S/X"].argmax()]
+mean_isd[price_result["S/X"].min()-0.0001]=price_result["imply_vol"].loc[price_result["S/X"].idxmin()]
+mean_isd[price_result["S/X"].max()]=price_result["imply_vol"].loc[price_result["S/X"].idxmax()]
 mean_isd=mean_isd.sort_index()
 
 def get_slope(x):
@@ -99,6 +99,7 @@ used_data = used_data.loc[-np.isinf(used_data.amihud)]
 used_data["time"]=np.log(used_data["time"])
 used_data["inter_call_money"]=used_data["contract_is_call"]*used_data["S/X"]
 used_data["inter_put_money"]=(~used_data["contract_is_call"].astype("bool")).astype("int")*used_data["S/X"]
+used_data["inter_call_skewness"]=used_data["contract_is_call"]*used_data["skewness"]
 
 used_data=used_data[
     [
@@ -121,7 +122,8 @@ used_data=used_data[
         "volume",
         "contract_is_call",
         "inter_call_money",
-        "inter_put_money"
+        "inter_put_money",
+        "inter_call_skewness"
     ]
 ]
 
@@ -143,7 +145,8 @@ X=used_data[
         "volume",
         "contract_is_call",
         "inter_call_money",
-        "inter_put_money"
+        "inter_put_money",
+        "inter_call_skewness"
     ]
 ]
 
@@ -162,12 +165,12 @@ with open("drift/independent_variables_corr.tex","w") as f:
 X_corr.to_excel("data/independent_variables_corr.xlsx")
 
 #剔除volatility、delta_5、btc_volume回归
-model_1=stf.ols("bias_int5~log_ret+volatility+skewness+amihud+maxmin_ratio+time+vol_pre+spread+open_interest+slope+volume+contract_is_call+inter_call_money+inter_put_money",data=used_data,hasconst=True).fit()
+model_1=stf.ols("bias_int5~log_ret+volatility+skewness+amihud+maxmin_ratio+time+vol_pre+spread+open_interest+slope+volume+contract_is_call+inter_call_money+inter_put_money+inter_call_skewness",data=used_data,hasconst=True).fit()
 
-model_1_abs=stf.ols("abs_bias_int5~log_ret+volatility+skewness+amihud+maxmin_ratio+time+vol_pre+spread+open_interest+slope+volume+contract_is_call+inter_call_money+inter_put_money",data=used_data,hasconst=True).fit()
+model_1_abs=stf.ols("abs_bias_int5~log_ret+volatility+skewness+amihud+maxmin_ratio+time+vol_pre+spread+open_interest+slope+volume+contract_is_call+inter_call_money+inter_put_money+inter_call_skewness",data=used_data,hasconst=True).fit()
 
-model_2=stf.ols("relative_bias_int5~log_ret+volatility+skewness+amihud+maxmin_ratio+time+vol_pre+spread+open_interest+slope+volume+contract_is_call+inter_call_money+inter_put_money",data=used_data,hasconst=True).fit()
-model_2_abs=stf.ols("relative_abs_bias_int5~log_ret+volatility+skewness+amihud+maxmin_ratio+time+vol_pre+spread+open_interest+slope+volume+contract_is_call+inter_call_money+inter_put_money",data=used_data,hasconst=True).fit()
+model_2=stf.ols("relative_bias_int5~log_ret+volatility+skewness+amihud+maxmin_ratio+time+vol_pre+spread+open_interest+slope+volume+contract_is_call+inter_call_money+inter_put_money+inter_call_skewness",data=used_data,hasconst=True).fit()
+model_2_abs=stf.ols("relative_abs_bias_int5~log_ret+volatility+skewness+amihud+maxmin_ratio+time+vol_pre+spread+open_interest+slope+volume+contract_is_call+inter_call_money+inter_put_money+inter_call_skewness",data=used_data,hasconst=True).fit()
 summaries = summary_col([model_1,model_1_abs,model_2,model_2_abs], stars=True, info_dict={
                         "observations": lambda x: x.nobs, "R-Squared": lambda x: x.rsquared, "Adjusted R-Squared": lambda x: x.rsquared_adj})
 re_for_tabular = re.compile(r"\\begin{tabular}[\d\D]*\\end{tabular}")
