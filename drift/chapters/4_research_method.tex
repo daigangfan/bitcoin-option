@@ -74,7 +74,24 @@
     \end{itemize}
     这些指标能够衡量期权自身性质对真实价格的影响，主要是不同性质的期权可能导致投资者对其供给和需求的不平衡会造成期权价格的偏离。
     \section{套利策略}
-    B-S模型是基于用股票和无风险债券复制期权而没有套利空间的原理推导出来的。由此可以利用实际价格与模型价格偏离的部分，构建套利策略，这一策略将反映出B-S模型中包含的信息价值。策略详情如下：
+    B-S模型是基于用股票和无风险债券复制期权而没有套利空间的原理推导出来的。由此可以利用实际价格与模型价格偏离的部分，构建套利策略，这一策略将反映出B-S模型中包含的信息价值。根据已有的B-S模型计算delta值后，策略详情如下：
     \begin{itemize}
-        \item
+        \item 对于一只期权，有交易记录的一天即用实际价格和B-S模型价格比较，实际价格高于模型价格的，卖出期权，同时买入delta份比特币进行对冲；实际价格低于模型价格的，买入期权，同时卖出delta份比特币进行对冲。记录现金流。
+        \item 在第二天\footnote{当期权的交易数据不是连续时，选择该期权下一条有交易的日期，一般间隔不会太大。}清空已有的持仓（包括期权和股票），同时重新构建新的资产组合。如果第二天为该期权的行权日，则视比特币价格与行权价之间的关系选择是否行权。完成后记录现金流。
+        \item 将一只期权各个时点上（构建期权和清空仓位的日期）的现金流按照模型采用的无风险收益率（年化5$\%$）折现至起始日期，并计算入现金流-出现金流。
     \end{itemize}
+    根据参考文献\cite{Hull-2017}，考虑到价格和波动率之间的相关性，可以通过修正由B-S模型简单计算出来的delta的方式来实现优化的对冲比率。推导得到的最优对冲比率$\delta_{MV}$\footnote{此处的最优指的是期望的最小方差}为：
+    \begin{equation}\label{MVmodel}
+        \delta_{MV}=\delta_{BS}+\frac{\gamma_{BS}}{S\sqrt{T}}(a+b\delta_{BS}+c\delta^2_{BS})
+    \end{equation}
+    其中$\delta_{BS}$为Black-Scholes模型计算出的delta，$\gamma_{BS}$为Black-Scholes模型计算出的gamma。
+    实际应用中，可以滚动估计包含delta和delta二次项的线性模型：
+    \begin{equation}
+        \Delta{f}-\delta_{BS}\Delta{S}=\frac{\gamma_{BS}}{\sqrt{T}}\frac{\Delta{S}}{S}(\hat{a}+\hat{b}\delta_{BS}+\hat{c}\delta^2_{BS})+\epsilon
+    \end{equation}
+    得到参数之后带入式\ref{MVmodel}，可得到此时的对冲误差为：
+    \begin{equation}
+        \epsilon_{MV}=\Delta{f}-\delta_{BS}\Delta{f}-\frac{\gamma_{BS}}{\sqrt{T}}\frac{\Delta{f}}{S}(\hat{a}+\hat{b}\delta_{BS}+\hat{c}\delta^2_{BS})
+    \end{equation}
+    根据最小二乘法的定义，如果原有对冲误差和$\delta_{BS}$之间的关系设定正确，则对冲误差$\epsilon_{MV}$的方差已经被最小化。
+    

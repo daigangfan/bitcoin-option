@@ -30,7 +30,8 @@ option_data["spot_price"] = option_data["date"].apply(get_spot_price)
 
 # TODO:年化利率的选择，包括如何选择后面研究用到的利率（怎么从5，10，20 30）中选择的？
 
-
+TOTAL_VOL=btc_data["log_ret"].std()
+option_data["volatility"]=TOTAL_VOL
 def Pricing(x, ints=0.05):
     maturity_date = x["exp_date"]
     start_date = x["date"]
@@ -101,7 +102,7 @@ def get_BS_delta(x, ints=0.05):
         return norm.cdf(d1)-1
 
 price_result["delta_5"]=price_result.apply(get_BS_delta,axis=1)
-
+price_result["bias"]=price_result["vwap"]/price_result["int5"]
 writer = pd.ExcelWriter("data/price_result.xlsx")
 with writer:
     price_result.to_excel(writer,index=False)
