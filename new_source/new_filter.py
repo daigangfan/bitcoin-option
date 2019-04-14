@@ -1,7 +1,7 @@
 
 import pandas as pd
 from math import isnan
-price_result = pd.read_excel("data/price_result.xlsx")
+price_result = pd.read_excel("new_data/price_result.xlsx")
 price_result_after_time=price_result.query("time>7")
 price_result_after_volume=price_result_after_time.query("volume>1")
 # #暂时先留下2以下的
@@ -27,7 +27,7 @@ def reformat_index(x: pd.DataFrame):
     x.columns.name = "time_cut"
 def get_bias_groups(price_result:pd.DataFrame,name=""):
     price_result_grouped = price_result.groupby(["time_cut", "moneyness_cut"])
-    const_bias_mean=price_result_grouped["const_bias"].mean()
+    const_bias_mean=price_result_grouped["bias"].mean()
 
     const_bias_mean = const_bias_mean.unstack("time_cut")
 
@@ -36,8 +36,8 @@ def get_bias_groups(price_result:pd.DataFrame,name=""):
     reformat_index(const_bias_mean)
     reformat_index(block_counts)
 
-    time_cut_mean = price_result.groupby("time_cut")["const_bias"].mean()
-    moneyness_cut_mean = price_result.groupby("moneyness_cut")["const_bias"].mean()
+    time_cut_mean = price_result.groupby("time_cut")["bias"].mean()
+    moneyness_cut_mean = price_result.groupby("moneyness_cut")["bias"].mean()
 
     time_cut_mean.index = [str(a) for a in time_cut_mean.index]
     moneyness_cut_mean.index = [str(a) for a in moneyness_cut_mean.index]
@@ -68,16 +68,16 @@ with writer:
     price_result.to_excel(writer,index=False)
 
 with open("drift/new_describes/dependent_variables_describe.tex","w") as f:
-    latex_str=price_result["const_bias"].describe().to_latex(float_format=lambda x: "{:.2f}".format(
+    latex_str=price_result["bias"].describe().to_latex(float_format=lambda x: "{:.2f}".format(
         x) if not isnan(x) else " ")
     f.write(latex_str)
 
 with open("drift/new_describes/call_dependent_variables_describe.tex","w") as f:
-    latex_str=price_result.query("contract_is_call")["const_bias"].describe().to_latex(float_format=lambda x: "{:.2f}".format(
+    latex_str=price_result.query("contract_is_call")["bias"].describe().to_latex(float_format=lambda x: "{:.2f}".format(
         x) if not isnan(x) else " ")
     f.write(latex_str)
 
 with open("drift/new_describes/put_dependent_variables_describe.tex","w") as f:
-    latex_str=price_result.query("not contract_is_call")["const_bias"].describe().to_latex(float_format=lambda x: "{:.2f}".format(
+    latex_str=price_result.query("not contract_is_call")["bias"].describe().to_latex(float_format=lambda x: "{:.2f}".format(
         x) if not isnan(x) else " ")
     f.write(latex_str)

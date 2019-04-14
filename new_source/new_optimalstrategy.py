@@ -42,10 +42,10 @@ def reg(y,x):
     return result
 
 def roll(price_result):
-    y=(price_result["option_price_diff"]-price_result["const_delta_5"]*price_result["btc_price_diff"])
-    x=price_result["const_delta_5"]   
+    y=(price_result["option_price_diff"]-price_result["delta_5"]*price_result["btc_price_diff"])
+    x=price_result["delta_5"]   
     result=reg(y,x)
-    x=np.c_[np.ones(600),price_result.loc[:,"const_delta_5"],price_result.loc[:,"const_delta_5"]**2]
+    x=np.c_[np.ones(600),price_result.loc[:,"delta_5"],price_result.loc[:,"delta_5"]**2]
     return result,result.predict(x)
 
 model,data=roll(filtered_result)
@@ -77,12 +77,12 @@ def trade_delta(x: pd.DataFrame, add_gamma=False):
             continue
         date=x_copy.date
         x_copy=check_data.query("date==@date").iloc[0]
-        delta = x_copy["const_delta_5"]+x_copy["delta2"]
+        delta = x_copy["delta_5"]+x_copy["delta2"]
         weights = delta
         # 倒数第二条之前
         if ind+1 < x.shape[0] and x.iloc[ind+1]["date"] <= datetime(2018, 12, 31):
             # 实际价格低于模型价格，买入期权
-            if x_copy["vwap"] < x_copy["const_int5"]:
+            if x_copy["vwap"] < x_copy["int5"]:
                 money = - x_copy["vwap"] +\
                     weights*x_copy["spot_price"]
                 stream[x_copy["date"]]=money
@@ -92,7 +92,7 @@ def trade_delta(x: pd.DataFrame, add_gamma=False):
                 stream[x.iloc[ind+1]["date"]] = x.iloc[ind +
                                                        1]["vwap"]-weights*btc_spot_next+0.05/365*date_range*money
             # 实际价格高于模型价格，卖出期权
-            if x_copy["vwap"] > x_copy["const_int5"]:
+            if x_copy["vwap"] > x_copy["int5"]:
                 money = -weights * x_copy["spot_price"]+x_copy["vwap"]  
                 stream[x_copy["date"]]=money
                 # 结束时平仓
@@ -103,7 +103,7 @@ def trade_delta(x: pd.DataFrame, add_gamma=False):
 
         # 最后一条,且在行权日之前
         if ind == x.shape[0]-1 and x.iloc[ind]["date"] < x.iloc[ind]["exp_date"] and x.iloc[ind]["exp_date"] <= datetime(2018, 12, 31):
-            if x_copy["vwap"] < x_copy["const_int5"]:
+            if x_copy["vwap"] < x_copy["int5"]:
                 money= -x_copy["vwap"] + \
                     weights*x_copy["spot_price"]
                 stream[x_copy["date"]] =money
@@ -123,7 +123,7 @@ def trade_delta(x: pd.DataFrame, add_gamma=False):
 
                     if btc_spot_next >= x_copy["strike"]:
                         stream[x_copy["exp_date"]] = - weights * btc_spot_next+money*date_range*0.05/365
-            if x_copy["vwap"] > x_copy["const_int5"]:
+            if x_copy["vwap"] > x_copy["int5"]:
                 money= x_copy["vwap"] - \
                     weights * x_copy["spot_price"]
                 stream[x_copy["date"]] =money
@@ -215,7 +215,7 @@ def hedge_single(x: pd.Series, ints=0.05):
     for date in rrule(DAILY, dtstart=x["date"], until=x["exp_date"]-timedelta(days=1)):
         spot = btc_date_data.loc[date, "Price"]
         time = ((x["exp_date"]-date).days+1)/sqrt(365)
-        volatility = x["const_volatility"]*sqrt(365)
+        volatility = x["volatility"]*sqrt(365)
         delta = get_delta(spot, strike, time,
                           x["contract_is_call"], volatility)
         delta_part2=model.predict([1,delta,delta**2])[0]
@@ -227,7 +227,7 @@ def hedge_single(x: pd.Series, ints=0.05):
 
     interest_cost = (ints*(x["vwap"]-delta_series *
                            used_btc_data["Price"].iloc[:-1])*time_series/365/x["time"]).sum()
-    if x["vwap"] < x["const_int5"]:
+    if x["vwap"] < x["int5"]:
         return end_pay-start_cost-hedge_cost-interest_cost
     else:
         return start_cost+hedge_cost+interest_cost-end_pay

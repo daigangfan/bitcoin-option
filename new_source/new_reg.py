@@ -90,7 +90,7 @@ price_result["maxmin_ratio"] = btc_data["maxmin_ratio"].loc[pd.DatetimeIndex(
 
 
 price_result.rename(columns={"Volume":"btc_volume"},inplace=True)
-used_data = price_result[["const_bias","const_delta_5", "S/X","time", "vol_pre", "log_ret", "volatility", "skewness", "amihud",
+used_data = price_result[["bias","delta_5", "S/X","time", "vol_pre", "log_ret", "volatility", "skewness", "amihud",
                           "spread", "open_interest", "contract_is_call",  "maxmin_ratio","slope","btc_volume","volume"]]
 used_data = used_data.dropna()
 used_data = used_data.loc[-np.isinf(used_data.amihud)]
@@ -102,7 +102,7 @@ used_data["inter_call_skewness"]=used_data["contract_is_call"]*used_data["skewne
 
 used_data.to_excel("new_data/data_for_regression.xlsx",index=False)
 used_data=used_data[
-    ["const_bias",
+    ["bias",
         "log_ret",
         "volatility",
         "skewness",
@@ -110,7 +110,7 @@ used_data=used_data[
         "maxmin_ratio",
         "btc_volume",
         "time",
-        "const_delta_5",
+        "delta_5",
         "vol_pre",
         "spread",
         "open_interest",
@@ -133,7 +133,7 @@ X=used_data[
         "maxmin_ratio",
         "btc_volume",
         "time",
-        "const_delta_5",
+        "delta_5",
         "vol_pre",
         "spread",
         "open_interest",
@@ -160,8 +160,8 @@ with open("drift/new_describes/independent_variables_corr.tex","w") as f:
 
 X_corr.to_excel("new_data/independent_variables_corr.xlsx",index=False)
 used_data.to_excel("new_data/data_for_regression.xlsx",index=False)
-model_1_stepwise=stf.ols('''const_bias ~ log_ret + amihud + maxmin_ratio + btc_volume + 
-    const_delta_5 + vol_pre + spread + open_interest + slope + contract_is_call + 
+model_1_stepwise=stf.ols('''bias ~ log_ret + amihud + maxmin_ratio + btc_volume + 
+    delta_5 + vol_pre + spread + open_interest + slope + contract_is_call + 
     inter_call_money + inter_put_money''',data=used_data,hasconst=True).fit()
 summaries = summary_col([model_1_stepwise], stars=True, model_names=["定价偏差"],info_dict={
                         "observations": lambda x: x.nobs, "R-Squared": lambda x: x.rsquared, "Adjusted R-Squared": lambda x: x.rsquared_adj})
