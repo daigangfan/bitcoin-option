@@ -36,7 +36,7 @@ def trade_delta(x: pd.DataFrame, add_gamma=False):
             continue
         if not(check_data.date == x_copy.date).any():
             continue
-        delta = x_copy["delta_5"]
+        delta = x_copy["const_delta_5"]
         weights = delta
         # 倒数第二条之前
         if ind+1 < x.shape[0] and x.iloc[ind+1]["date"] <= datetime(2018, 12, 31):
@@ -50,8 +50,8 @@ def trade_delta(x: pd.DataFrame, add_gamma=False):
                                                        1]["vwap"]-weights*btc_spot_next
             # 实际价格高于模型价格，卖出期权
             if x_copy["vwap"] > x_copy["int5"]:
-                stream[x_copy["date"]] = weights * \
-                    x_copy["spot_price"]-x_copy["vwap"]  # 结束时平仓
+                stream[x_copy["date"]] = -weights * \
+                    x_copy["spot_price"]+x_copy["vwap"]  # 结束时平仓
                 btc_spot_next = x.iloc[ind+1]["spot_price"]
                 stream[x.iloc[ind+1]["date"]] = x.iloc[ind +
                                                        1]["vwap"]-weights*btc_spot_next

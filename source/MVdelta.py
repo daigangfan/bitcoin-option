@@ -160,8 +160,3 @@ returns = results.apply(get_return)
 returns = returns.dropna()
 call_returns = returns.loc[returns.index.str.contains("Call")]
 put_returns = returns.loc[returns.index.str.contains("Put")]
-
-with open("drift/new_describes/call_opt_return_describe.tex", "w") as f:
-    f.write(call_returns.describe().to_latex())
-with open("drift/new_describes/put_opt_return_describe.tex", "w") as f:
-    f.write(put_returns.describe().to_latex())
