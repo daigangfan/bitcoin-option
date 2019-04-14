@@ -7,9 +7,9 @@ from scipy.stats import norm
 option_data = pd.read_excel("new_data/ledgerx_data.xlsx")
 btc_data = pd.read_excel("new_data/btc_data.xlsx")
 btc_data.index=btc_data["Date"]
-btc_data["volatility"] = btc_data["log_ret"].rolling(30).std()
-btc_data["kurtosis"] = btc_data["log_ret"].rolling(30).kurt()
-btc_data["skewness"] = btc_data["log_ret"].rolling(30).skew()
+btc_data["volatility"] = btc_data["log_ret"].rolling(365).std()
+btc_data["kurtosis"] = btc_data["log_ret"].rolling(365).kurt()
+btc_data["skewness"] = btc_data["log_ret"].rolling(365).skew()
 btc_data["amihud"]=np.abs(btc_data["log_ret"])/np.log(btc_data["Volume"])
 btc_data["amihud"]=btc_data["amihud"].rolling(30,min_periods=1).sum()
 start_time = datetime(2017, 10, 17)
