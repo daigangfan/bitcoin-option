@@ -123,12 +123,10 @@ def get_return(x: OrderedDict):
     final_date = list(x.keys())[-1]
     start_date = list(x.keys())[0]
     net_in = 0
-    net_out = 0
     for key, item in x.items():
         
         net_in += exp(-0.05*(final_date-key).days/365)*item
         
-    range1 = (final_date-start_date).days
     return net_in
 
 

@@ -100,7 +100,7 @@ used_data["inter_call_money"]=used_data["contract_is_call"]*used_data["S/X"]
 used_data["inter_put_money"]=(~used_data["contract_is_call"].astype("bool")).astype("int")*used_data["S/X"]
 used_data["inter_call_skewness"]=used_data["contract_is_call"]*used_data["skewness"]
 
-used_data.to_excel("new_data/data_for_regression.xlsx")
+used_data.to_excel("new_data/data_for_regression.xlsx",index=False)
 used_data=used_data[
     ["const_bias",
         "log_ret",
@@ -151,15 +151,15 @@ with open("drift/new_describes/independent_variables_describe.tex","w") as f:
     latex_str=X_descr.to_latex(float_format=lambda x: "{:.2f}".format(
         x) if not np.isnan(x) else " ")
     f.write(latex_str)
-X_descr.to_excel("new_data/independent_variables_describe.xlsx")
+X_descr.to_excel("new_data/independent_variables_describe.xlsx",index=False)
 X_corr=X.corr()
 with open("drift/new_describes/independent_variables_corr.tex","w") as f:
     latex_str=X_corr.to_latex(float_format=lambda x: "{:.2f}".format(
         x) if not np.isnan(x) else " ")
     f.write(latex_str)
 
-X_corr.to_excel("new_data/independent_variables_corr.xlsx")
-used_data.to_excel("new_data/data_for_regression.xlsx")
+X_corr.to_excel("new_data/independent_variables_corr.xlsx",index=False)
+used_data.to_excel("new_data/data_for_regression.xlsx",index=False)
 model_1_stepwise=stf.ols('''const_bias ~ log_ret + amihud + maxmin_ratio + btc_volume + 
     const_delta_5 + vol_pre + spread + open_interest + slope + contract_is_call + 
     inter_call_money + inter_put_money''',data=used_data,hasconst=True).fit()
@@ -179,4 +179,4 @@ with open("drift/new_describes/regression_table.tex", "w") as f:
     f.write(tex)
 
 price_result["contract_is_call"] = price_result["contract_is_call"].astype(bool)
-price_result.to_excel("new_data/filtered_price_result.xlsx")
+price_result.to_excel("new_data/filtered_price_result.xlsx",index=False)
