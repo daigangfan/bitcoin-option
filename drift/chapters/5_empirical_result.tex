@@ -1,0 +1,146 @@
+\chapter{实证结果}
+\section{定价结果}
+按照第4章的Black-Scholes模型\ref{bs-call}和\ref{bs-put}，对每个期权的每条交易数据，将距离到期期限、数据期的波动率估计、利率、当日比特币价格、行权价等信息输入模型，得到B-S模型定价。期权的真实价格为当天的成交量加权均价。在定价过程中，我们发现部分期权由于深度价外、而且期限较短，几乎没有模型价值，但仍有较高的真实价格，如果用二者数值的绝对差异损失过多的信息，故定义定价偏差为真实价格与模型价格之比即真实价格/模型价格。同时根据参考文献，深度价外期权和期限较短的期权并不适合用B-S模型定价\cite{10.2307/1831029}\cite{Jame-1979}。因此我们对数据做如下清理：
+\begin{itemize}
+    \item 剔除每日交易量仅有1的记录
+    \item 剔除距离到期日在7日之内的记录
+    \item 剔除认购期权的相对价值在0.8以下，认沽期权的相对价值在1.25以上的记录
+    \item 剔除期权价格不在期权价格合理范围内的记录，这些期权无法按照价格求得隐含波动率。
+\end{itemize}
+保留共计600条记录。
+600条记录的定价偏差的描述性统计如下：
+~\\
+\begin{center}
+    \begin{threeparttable}[H]
+    
+        \begin{small}
+            \caption{定价偏差描述统计}
+            \label{tab:option_bias_group}
+                \input{new_describes/dependent_variables_describe.tex}
+                
+        \end{small}
+    \end{threeparttable}
+\end{center}
+可见在合理的相对价值区间内，真实价格和模型价格差异仍然较大，最大接近6倍。最小接近十分之一，但平均水平非常接近1，说明真实价格和模型价格的平均水平相对比较一致。
+~\\
+为了初步展示定价偏差和期权价值程度之间的关系，我按照期权的相对价值（比特币价格/行权价）和期限分组，统计了各个组内定价偏差的平均值，以下是定价绝对偏差分组统计的结果：
+~\\
+\begin{center}
+    \begin{threeparttable}[H]
+        \centering
+        \begin{small}
+            \caption{定价偏差分组统计}
+            \label{tab:option_bias_group}
+                \input{new_describes/_option_bias_group.tex}
+                \begin{tablenotes}
+                    \footnotesize
+                    \item 注：money\_cut指期权价值程度（比特币价格/行权价）。
+                \end{tablenotes}
+        \end{small}
+    \end{threeparttable}
+        
+\end{center}
+~\\
+可以看到，定价偏差随期限的上升呈增长趋势，同时期权价值程度对定价偏差的影响可以通过对认购和认沽期权分别分组统计来体现：
+~\\
+\begin{center}
+    \begin{threeparttable}[H]
+        \begin{small}
+            \caption{定价偏差分组统计:认购期权}
+            \label{tab:call_option_bias_group}
+                \input{new_describes/call_option_bias_group.tex}
+        \end{small}
+    \end{threeparttable}
+        
+\end{center}
+~\\
+认沽期权分组统计结果：
+~\\
+\begin{center}
+    \begin{threeparttable}[H]
+        \begin{small}
+            \caption{定价偏差分组统计:认沽期权}
+            \label{tab:put_option_bias_group}
+                \input{new_describes/put_option_bias_group.tex}
+    
+        \end{small}
+    \end{threeparttable}
+        
+\end{center}
+~\\
+从分组结果直观而言，实值期权的偏差要小于虚值期权，且这一影响对认沽期权更明显。
+
+\section{回归模型}
+我们首先构建第\ref{reg vars}节提出的变量，并对其进行描述性统计。变量的描述统计和相关性矩阵如下:
+\newpage
+\newgeometry{top=1cm}
+\begin{landscape}
+    \tiny
+\begin{table}[H]
+    
+    \caption{解释变量的描述性统计}
+    \input{new_describes/independent_variables_describe.tex}
+\end{table}
+\begin{table}[H]
+    
+    \caption{解释变量的相关性矩阵}
+    \input{new_describes/independent_variables_corr.tex}    
+\end{table}
+\end{landscape}
+
+    \newpage
+\restoregeometry
+其中，log\_ret为当日比特币对数收益率、volatility为30天滚动估计收益波动率、skewness为30天滚动估计收益偏度、amihud为Amihud非流动性指标，maxmin\_ratio为交易所价格最大者与最小者之比，btc\_volume为当日比特币交易量，time为期权期限，delta\_5为当前模型下计算出的delta，
+vol\_pre为波动率溢价（参见\ref{reg vars}），open\_interest为当日该期权持仓量，slope为当日期权波动率曲线的倾斜程度，contract\_is\_call为指示变量，指期权是否为认购期权。
+\par{其中，相对价值（比特币价格/行权价）的意义与期权的种类有关，对于认购期权，这一指标越高证明期权价值程度越深，对于认沽期权则完全相反，故构建两个交互变量inter\_call\_money和inter\_put\_money来表示不同类期权中的相对价值对定价偏差的影响。}
+\par{从相关性矩阵可见，部分变量之间的相关性水平较高。可利用后向逐步回归的方法剔除部分变量，即先采用全部变量进行回归，再通过AIC信息熵损失最小法逐步选择去掉的变量并进行回归。最终，结合相关性矩阵并参考后向逐步回归结果，可以剔除掉比特币波动率、偏度、期权种类指示变量和偏度的交互项这几个变量。以偏差为解释变量，进行最小二乘法回归，结果如下：}
+\newpage
+\newgeometry{top=1cm}
+\begin{center}
+    \begin{threeparttable}[H]
+
+        \caption{回归估计结果}
+        \input{new_describes/regression_table.tex}
+        
+        \begin{tablenotes}
+            \footnotesize
+            \item *:p值<0.1, **:p值<0.05, ***:p值<0.001
+            \item 括号中汇报估计系数的标准差。
+        \end{tablenotes}
+    \end{threeparttable}
+\end{center}
+\newpage
+\restoregeometry
+\par{
+实际上，这里的定价差异相当于是假设B-S模型价格为供需平衡状态下的均衡价格，而偏差主要衡量了期权的供需不均衡的程度。这些解释变量都能起到解释期权供需差异的意义。比特币的收益率、交易量衡量了短期市场的热度，当市场投资情绪较高时，对对冲的要求也更高，故此时对期权的需求更大，提升了期权的价格。衡量比特币交易流动性的Amihud指标、最大价格与最小价格之比两个变量均与比特币市场的流动性有负相关关系，而在回归结果中对期权定价的相对偏差有显著正向关系。说明很可能随着比特币市场流动性下降，投资者对于用期权进行风险管理和投机交易的需求也在不断提升，另一方面，流动性的变差导致B-S模型推导过程中用到的delta-对冲模式不能完整实现，故而导致价格不能回到有效情况下的水准。对于和期权自身性质有关的变量，其中比较显著的影响是波动率溢价。波动率溢价变量本身用到了未来信息，但它能够证明，部分价格看上去过高的期权交易可以被认为是投资者获得了对于未来波动率会更高的信息。除此之外，在控制其他变量不变的情况下，看涨期权价格会相对偏离更高，一般认为看涨期权未来收益上限更高，同时在比特币市场上可能存在更多通过看涨期权进行投机的力量，更高的需求让看涨期权获得了相对更高的交易价格。而对于期权价值程度的交互变量而言，对于两种期权都是实值程度越深，定价偏差越小，这也符合股票市场上观察到的结果。整个模型的R方达到50$\%$以上，有一定的解释能力。
+}
+\par{为了识别除了价值程度之外，其他变量是否在不同种类的期权中有不用的作用，将两种期权分组之后分别做最小二乘法回归，结果如下：}
+\newpage
+\newgeometry{top=3cm}
+\begin{center}
+    \begin{threeparttable}[H]
+
+        \caption{回归估计结果}
+        \input{new_describes/seperate_regression_table.tex}
+        \begin{tablenotes}
+            \footnotesize
+            \item *:p值<0.1, **:p值<0.05, ***:p值<0.001
+            \item 括号中汇报估计系数的标准差。
+        \end{tablenotes}
+    \end{threeparttable}
+\end{center}
+\newpage
+\restoregeometry
+只有比特币的收益率指标出现了两者效应相反的情况，同时比特币的交易量出现了对认购期权不显著、认沽期权显著的情况。根据前述解释，当市场热度增加时，投资者更大的需求可能是直接投资比特币，同时利用看跌期权进行对冲操作，这时会导致看跌期权的需求更高，也推动了其真实价格的上浮。
+\section{套利策略}
+将第\ref{strategy}节构建的策略应用到筛选后的数据上。一个普通的delta套利策略结果如下所示（分call和put描述）：
+~\\
+\input{new_describes/call_return_describe.tex}
+\input{new_describes/put_return_describe.tex}
+~\\
+对于认购期权，大部分期权都能获得较高的正向收益，而认沽期权则不能，可见认沽期权的定价误差可能更多地由于整体市场对期权需求维持在较高水平，导致其定价本身存在很高溢价，简单的B-S模型不能反映其真实价格。而用模型对认购期权定价则包含了一定的信息成分，能够被用于套利操作。
+% 采用第\ref{strategy}节介绍的最优对冲法则构建策略，得到的结果如下所示（分call和put描述）：
+% ~\\
+% \input{new_describes/call_opt_return_describe.tex}
+% \input{new_describes/put_opt_return_describe.tex}
+% ~\\

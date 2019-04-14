@@ -8,6 +8,8 @@ import re
 from math import log, exp, sqrt
 from scipy.stats import norm
 from statsmodels.formula import api as stf
+import matplotlib.pyplot as plt
+
 price_result = pd.read_excel("new_data/filtered_price_result.xlsx")
 btc_data = pd.read_excel("data/btc_data.xlsx")
 if "skewness" not in price_result.columns:
@@ -52,23 +54,28 @@ price_result["vol_pre"] = price_result.apply(get_vol_pre, axis=1)
 
 price_result["amihud"]=btc_data["amihud"].loc[pd.DatetimeIndex(price_result["date"]).date].values
 
-money_cut_more=pd.cut(price_result["S/X"],[0, 0.3,0.6, 0.9,1.1,1.4,2.0,3.9],right=True)
-mean_isd=price_result.groupby(money_cut_more)["imply_vol"].mean()
-mean_isd.index=pd.Series(mean_isd.index).apply(lambda x:(x.left+x.right)/2).astype("double")
-mean_isd[price_result["S/X"].min()-0.0001]=price_result["imply_vol"].loc[price_result["S/X"].idxmin()]
-mean_isd[price_result["S/X"].max()]=price_result["imply_vol"].loc[price_result["S/X"].idxmax()]
-mean_isd=mean_isd.sort_index()
+# money_cut_more=pd.cut(price_result["S/X"],[0, 0.6, 0.9,1.1,1.4,2.0,3.9],right=True)
+# mean_isd=price_result.groupby(money_cut_more)["imply_vol"].mean()
+# mean_isd.index=pd.Series(mean_isd.index).apply(lambda x:(x.left+x.right)/2).astype("double")
+# z=price_result.dropna(subset={"imply_vol"})
+# mean_isd[price_result["S/X"].min()-0.0001]=z["imply_vol"].loc[z["S/X"].idxmin()]
+# mean_isd[price_result["S/X"].max()]=z["imply_vol"].loc[z["S/X"].idxmax()]
+# mean_isd=mean_isd.sort_index()
 
+# mean_isd.plot()
+# plt.savefig("drift/figures/isd_plot.png")
+mean_isd=price_result.groupby("strike")["imply_vol"].mean()
 def get_slope(x):
-    moneyness=x["S/X"]
-    locate=mean_isd.index.searchsorted(moneyness)
-    if locate>0:
-        return (mean_isd.iloc[locate]-mean_isd.iloc[locate-1])/(mean_isd.index[locate]-mean_isd.index[locate-1])
-
+    strike=x["strike"]
+    loc=mean_isd.index.get_loc(strike)
+    if loc==0:
+        return (mean_isd.iloc[1]-mean_isd.iloc[0])/(mean_isd.index[1]-mean_isd.index[0])
+    elif loc==mean_isd.shape[0]-1:
+        return (mean_isd.iloc[loc]-mean_isd.iloc[loc-1])/(mean_isd.index[loc]-mean_isd.index[loc-1])
     else:
-        print("error!")
-        return float("nan")
-
+        slope1=(mean_isd.iloc[loc+1]-mean_isd.iloc[loc])/(mean_isd.index[loc+1]-mean_isd.index[loc])
+        slope2=(mean_isd.iloc[loc]-mean_isd.iloc[loc-1])/(mean_isd.index[loc]-mean_isd.index[loc-1])
+        return (slope1+slope2)/2
 price_result["slope"]=price_result.apply(get_slope,axis=1)
 price_result["spread"] = price_result["last_ask"]-price_result["last_bid"]
 exchanges_price_data = pd.read_excel("data/bitcoinity_data.xlsx")
@@ -93,7 +100,7 @@ used_data["inter_call_money"]=used_data["contract_is_call"]*used_data["S/X"]
 used_data["inter_put_money"]=(~used_data["contract_is_call"].astype("bool")).astype("int")*used_data["S/X"]
 used_data["inter_call_skewness"]=used_data["contract_is_call"]*used_data["skewness"]
 
-
+used_data.to_excel("new_data/data_for_regression.xlsx")
 used_data=used_data[
     ["const_bias",
         "log_ret",
@@ -171,3 +178,5 @@ with open("drift/new_describes/regression_table.tex", "w") as f:
     tex = cut(tex)
     f.write(tex)
 
+price_result["contract_is_call"] = price_result["contract_is_call"].astype(bool)
+price_result.to_excel("new_data/filtered_price_result.xlsx")

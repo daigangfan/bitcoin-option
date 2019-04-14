@@ -4,11 +4,14 @@
 \usepackage{booktabs}
 \usepackage{graphicx}
 \usepackage{threeparttable}
+\usepackage{geometry}
+\usepackage{float}
+\usepackage{lscape}
 \begin{document}
 % 封面
-% \frontmatter
-% \input{chapters/cover}
-% \makecover
+\frontmatter
+\input{chapters/cover}
+\makecover
 \tableofcontents
 \mainmatter
 %引言
@@ -19,6 +22,10 @@
 \input{chapters/3_data.tex}
 % 研究方法
 \input{chapters/4_research_method.tex}
+%研究结果
+\input{chapters/5_empirical_result.tex}
+%结论
+\input{chapters/6_conclusion.tex}
 \bibliographystyle{thuthesis-numeric}
 \bibliography{paperbib}
 

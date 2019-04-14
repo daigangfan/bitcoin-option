@@ -8,5 +8,38 @@
 \usepackage{geometry}
 %used for some quick output
 \begin{document}
-    \input{regression_table_bias.tex}
-\end{document}
+    % 分组统计误差：
+    %     \input{new_describes/_option_bias_group.tex}
+    % ~\\
+    % 各组内数量：
+    % \input{new_describes/_option_counts_group.tex}
+    % ~\\
+    % 对全部的call：
+    % \input{new_describes/call_option_bias_group.tex}
+    % ~\\
+    % \input{new_describes/call_option_counts_group.tex}
+    % ~\\
+    % 对全部put:
+    % \input{new_describes/put_option_bias_group.tex}
+    % ~\\
+    % \input{new_describes/put_option_counts_group.tex}
+    % ~\\
+    % bias的描述统计：
+    % \input{new_describes/dependent_variables_describe.tex}
+    % ~\\
+    % 对全部Call
+    % \input{new_describes/call_dependent_variables_describe.tex}
+    
+    % ~\\
+    % 对全部put
+    % \input{new_describes/put_dependent_variables_describe.tex}
+    % ~\\
+    % stepwise回归结果
+    
+    ~\\
+    \input{new_describes/regression_table.tex}
+    ~\\
+    左列为call 右列为put
+    ~\\
+    \input{new_describes/seperate_regression_table.tex}
+    \end{document}

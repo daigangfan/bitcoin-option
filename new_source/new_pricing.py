@@ -82,10 +82,10 @@ def get_BS_delta(x, ints=0.05,const=True):
 price_result["const_delta_5"]=price_result.apply(get_BS_delta,axis=1)
 price_result["delta_5"]=price_result.apply(get_BS_delta,axis=1,const=False)
 
-writer = pd.ExcelWriter("data/price_result.xlsx")
+writer = pd.ExcelWriter("new_data/price_result.xlsx")
 with writer:
     price_result.to_excel(writer,index=False)
 
-writer = pd.ExcelWriter("data/btc_data.xlsx")
+writer = pd.ExcelWriter("new_data/btc_data.xlsx")
 with writer:
     btc_data.to_excel(writer,index=False)

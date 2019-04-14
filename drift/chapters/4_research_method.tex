@@ -41,6 +41,8 @@
         \hat{\sigma}=\sum_{i=1}^{i=N}\frac{(r_{t-i}-\bar{r})^2}{N-1}
     \end{equation}
     其中$\bar{r}$为这一时期的平均收益率。
+    \subsection{利用部分指定数据期估计}
+    考虑到比特币本身价格的波动率持续较大，而在某些阶段，滚动估计的波动率较小，可能不能准确反映投资者对波动率的预期，故我选择整个数据期（2018年全年）的对数收益率波动率进行估计。
     \subsection{加权隐含波动率估计}
     从式\ref{bs-call}和\ref{bs-put}可以得出，期权的价格随波动率上升而上升。可以通过现在市场上的均衡期权价格得到一个$\sigma$的解，即为隐含波动率，这一预测方法利用了期权交易中的隐含信息。
     根据参考文献\cite{CHIRAS1978213}，每日有多支期权且他们隐含波动率不同时，可以用以下公式获得当日的加权隐含波动率(WISD)：
@@ -49,31 +51,31 @@
     \end{equation}
     其中 ， $WISD$为加权隐含波动率，$ISD_j$为第$j$个期权的隐含波动率，$N$为同一标的资产的期权个数，$\frac{\partial{W_j}}{\partial{v_j}}\frac{v_j}{W_j}$ 为期权价格相对于波动率的弹性。
     
-    \section{对定价偏差的解释}
+    \section{对定价偏差的解释}\label{reg vars}
     波动率微笑现象反映出了期权的隐含波动率和其价值程度（即资产价格与行权价之比）存在规律性的关系，同理我们可以探究很多变量对于期权真实价格与模型价格之间偏差的系统性影响。通过构建回归模型并对变量的系数进行分析，我们可以识别不同因素对真实价格偏离部分的影响的方向，并对其做出解释。这些变量主要分为两个方面：比特币市场因素和期权因素。
     \subsection{比特币市场有关变量}
     \begin{itemize}
-        \item LR 比特币市场对数收益率
-        \item STD 比特币历史波动率
-        \item SKEW 比特币历史偏度
-        \item AMI Amihud非流动性指标
-        \item BTC\_VOL 比特币市场总交易量
-        \item MR 当日比特币交易所中价格最高者和最低者之比
+        \item log\_ret 比特币市场对数收益率
+        \item volatility 比特币历史波动率
+        \item skewness 比特币历史偏度
+        \item amihud Amihud非流动性指标
+        \item btc\_volume 比特币市场总交易量
+        \item maxmin\_ratio 当日比特币交易所中价格最高者和最低者之比
     \end{itemize}
     
     这些指标衡量了比特币市场的市场环境。如波动率和偏度反映了投资者所处的风险情况，同时也属于识别出的模型设定问题，而非流动性指标和MR体现了市场的流动性情况，这些都可能造成真实价格同模型价格之间的偏差。
     \subsection{期权自身有关变量}
     \begin{itemize}
-        \item DELTA 期权根据Black-Scholes模型计算出的delta
-        \item TIME 期权距离到期日的时间
-        \item VP 期权的波动率溢价（Volatility Premimum），利用该期权当时的隐含波动率与当天至到期日之间的实现波动率之差计量。
-        \item VOL 期权当天交易量                                     
-        \item SPR 期权当天公开的买卖价差
-        \item OI 期权当天公开的持仓量（open interest）
-        \item CALL 哑变量，是否为认购期权，1为认购期权，0为认沽期权。 
+        \item delta 期权根据Black-Scholes模型计算出的delta
+        \item time 期权距离到期日的时间
+        \item vol\_pre 期权的波动率溢价（Volatility Premimum），利用该期权当时的隐含波动率与当天至到期日之间的实现波动率之差计量。
+        \item volume 期权当天交易量                                     
+        \item spread 期权当天公开的买卖价差
+        \item open\_interest 期权当天公开的持仓量
+        \item contract\_is\_call 哑变量，是否为认购期权，1为认购期权，0为认沽期权。 
     \end{itemize}
     这些指标能够衡量期权自身性质对真实价格的影响，主要是不同性质的期权可能导致投资者对其供给和需求的不平衡会造成期权价格的偏离。
-    \section{套利策略}
+    \section{套利策略}\label{strategy}
     B-S模型是基于用股票和无风险债券复制期权而没有套利空间的原理推导出来的。由此可以利用实际价格与模型价格偏离的部分，构建套利策略，这一策略将反映出B-S模型中包含的信息价值。根据已有的B-S模型计算delta值后，策略详情如下：
     \begin{itemize}
         \item 对于一只期权，有交易记录的一天即用实际价格和B-S模型价格比较，实际价格高于模型价格的，卖出期权，同时买入delta份比特币进行对冲；实际价格低于模型价格的，买入期权，同时卖出delta份比特币进行对冲。记录现金流。

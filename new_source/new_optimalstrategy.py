@@ -5,18 +5,18 @@ from math import log ,sqrt,exp
 from scipy.stats import norm 
 from collections import OrderedDict
 from datetime import datetime 
-price_result = pd.read_excel("data/price_result.xlsx")
-filtered_result = pd.read_excel("data/filtered_price_result.xlsx")
+price_result = pd.read_excel("new_data/price_result.xlsx")
+filtered_result = pd.read_excel("new_data/filtered_price_result.xlsx")
 
 price_grouped = price_result.groupby("contract_label")
-btc_data = pd.read_excel("data/btc_data.xlsx")
+btc_data = pd.read_excel("new_data/btc_data.xlsx")
 
 
 price_result_grouped = price_result.groupby("contract_label")
 diff=price_result_grouped["vwap"].diff()
 btc_data["btc_price_diff"]=btc_data["Price"].diff()
-price_result["option_price_diff"]=diff
-price_result["btc_price_diff"]=pd.merge(left=price_result,right=btc_data[["Date","btc_price_diff"]],left_on="date",right_on="Date",how="left")["btc_price_diff"]
+filtered_result["option_price_diff"]=diff
+filtered_result["btc_price_diff"]=pd.merge(left=price_result,right=btc_data[["Date","btc_price_diff"]],left_on="date",right_on="Date",how="left")["btc_price_diff"]
 def get_vega(x,ints=0.05):
     spot_price=x["spot_price"]
     strike_price=x["strike"]
@@ -26,7 +26,7 @@ def get_vega(x,ints=0.05):
         (volatility*sqrt(time))+0.5*(volatility*sqrt(time))
     result=spot_price*norm.pdf(d1)*sqrt(time)
     return result
-price_result["vega"]=price_result.apply(get_vega,axis=1)
+filtered_result["vega"]=filtered_result.apply(get_vega,axis=1)
 
 # regression function
 def reg(y,x):
@@ -43,13 +43,13 @@ def roll(price_result):
     y=(price_result["option_price_diff"]-price_result["delta_5"]*price_result["btc_price_diff"])
     x=price_result["delta_5"]   
     result=reg(y,x)
-    return result.predict([1,price_result.iloc[-1].loc["delta_5"],price_result.iloc[-1].loc["delta_5"]**2])[0]
-window=400
-data=pd.concat([(pd.Series(roll(price_result.iloc[i:i+window]),index=[price_result.index[i+window]])) for i in range(len(price_result)-window)])
-price_result["delta2"]=data
-price_result["delta2"]=price_result["delta2"]/price_result["btc_price_diff"]
-price_result_filted=price_result.dropna(subset=["delta2"],how="all").copy()
-price_grouped = price_result_filted.groupby("contract_label")
+    x=np.c_[np.ones(600),price_result.loc[:,"delta_5"],price_result.loc[:,"delta_5"]**2]
+    return result.predict(x)
+
+data=roll(filtered_result)
+filtered_result["delta2"]=data
+filtered_result["delta2"]=filtered_result["delta2"]/filtered_result["btc_price_diff"]
+price_grouped = price_result.groupby("contract_label")
 
 filtered_grouped = filtered_result.groupby("contract_label")
 
@@ -66,13 +66,15 @@ def trade_delta(x: pd.DataFrame, add_gamma=False):
     for ind in range(x.shape[0]):
         cash = 0
         x_copy = x.iloc[ind].copy()
-        # try:
-        #     check_data = filtered_grouped.get_group(
-        #         x_copy["contract_label"])
-        # except KeyError:
-        #     continue
-        # if not(check_data.date == x_copy.date).any():
-        #     continue
+        try:
+            check_data = filtered_grouped.get_group(
+                x_copy["contract_label"])
+        except KeyError:
+            continue
+        if not(check_data.date == x_copy.date).any():
+            continue
+        date=x_copy.date
+        x_copy=check_data.query("date==@date").iloc[0]
         delta = x_copy["delta_5"]+x_copy["delta2"]
         weights = delta
         # 倒数第二条之前
@@ -138,7 +140,7 @@ def trade_delta(x: pd.DataFrame, add_gamma=False):
     return stream
 
 
-results = price_grouped.apply(trade_delta)
+results = filtered_grouped.apply(trade_delta)
 
 def get_return(x: OrderedDict):
     if len(x) == 0:
@@ -160,8 +162,3 @@ returns = results.apply(get_return)
 returns = returns.dropna()
 call_returns = returns.loc[returns.index.str.contains("Call")]
 put_returns = returns.loc[returns.index.str.contains("Put")]
-
-with open("drift/new_describes/call_opt_return_describe.tex", "w") as f:
-    f.write(call_returns.describe().to_latex())
-with open("drift/new_describes/put_opt_return_describe.tex", "w") as f:
-    f.write(put_returns.describe().to_latex())

@@ -4,8 +4,16 @@ from math import isnan
 price_result = pd.read_excel("data/price_result.xlsx")
 price_result_after_time=price_result.query("time>7")
 price_result_after_volume=price_result_after_time.query("volume>1")
-#暂时先留下2以下的
-price_result_filtered=price_result_after_volume.query("const_bias<=2")
+# #暂时先留下2以下的
+# price_result_filtered=price_result_after_volume.query("const_bias<=2")
+call_quantile=price_result_after_volume.query("contract_is_call")["S/X"].quantile(20/100)
+put_quantile=price_result_after_volume.query("not contract_is_call")["S/X"].quantile(1-10/100)
+price_result_filtered=price_result_after_volume.loc[
+    (price_result_after_volume.contract_is_call & (price_result_after_volume["S/X"]>0.8)) |
+    (~price_result_after_volume.contract_is_call & (price_result_after_volume["S/X"]<1.25))
+]
+
+
 price_result=price_result_filtered
 price_result["time_cut"] = pd.cut(
     price_result["time"], [0, 30, 60, 180, 624], right=False)
@@ -51,10 +59,25 @@ def get_bias_groups(price_result:pd.DataFrame,name=""):
         latex_str = latex_str.replace(")", "")
 
         f.write(latex_str)
-get_bias_groups(price_result_filtered)
-get_bias_groups(price_result_filtered.query("contract_is_call"),name="call")
-get_bias_groups(price_result_filtered.query("not contract_is_call"),name="put")
+get_bias_groups(price_result)
+get_bias_groups(price_result.query("contract_is_call"),name="call")
+get_bias_groups(price_result.query("not contract_is_call"),name="put")
 
 writer=pd.ExcelWriter("new_data/filtered_price_result.xlsx")
 with writer:
-    price_result_filtered.to_excel(writer,index=False)
+    price_result.to_excel(writer,index=False)
+
+with open("drift/new_describes/dependent_variables_describe.tex","w") as f:
+    latex_str=price_result["const_bias"].describe().to_latex(float_format=lambda x: "{:.2f}".format(
+        x) if not isnan(x) else " ")
+    f.write(latex_str)
+
+with open("drift/new_describes/call_dependent_variables_describe.tex","w") as f:
+    latex_str=price_result.query("contract_is_call")["const_bias"].describe().to_latex(float_format=lambda x: "{:.2f}".format(
+        x) if not isnan(x) else " ")
+    f.write(latex_str)
+
+with open("drift/new_describes/put_dependent_variables_describe.tex","w") as f:
+    latex_str=price_result.query("not contract_is_call")["const_bias"].describe().to_latex(float_format=lambda x: "{:.2f}".format(
+        x) if not isnan(x) else " ")
+    f.write(latex_str)
