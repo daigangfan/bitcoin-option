@@ -163,7 +163,7 @@ used_data.to_excel("new_data/data_for_regression.xlsx")
 model_1_stepwise=stf.ols('''const_bias ~ log_ret + amihud + maxmin_ratio + btc_volume + 
     delta_5 + vol_pre + spread + open_interest + slope + contract_is_call + 
     inter_call_money + inter_put_money''',data=used_data,hasconst=True).fit()
-summaries = summary_col([model_1_stepwise], stars=True, info_dict={
+summaries = summary_col([model_1_stepwise], stars=True, model_names=["定价偏差"],info_dict={
                         "observations": lambda x: x.nobs, "R-Squared": lambda x: x.rsquared, "Adjusted R-Squared": lambda x: x.rsquared_adj})
 re_for_tabular = re.compile(r"\\begin{tabular}[\d\D]*\\end{tabular}")
 
