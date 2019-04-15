@@ -13,7 +13,7 @@
             \label{data_example}
         \end{small}
     \end{figure}
-    利用python爬虫获取了2017年10月17日至2018年12月31日的全部数据,剔除了如图\ref{data_example}中所示的隔夜互换、交易量为0（只有买价或卖价）的数据之后，得到共计1726条期权的交易数据。
+    利用python爬虫获取了2017年10月17日至2018年12月31日的全部数据，剔除了如图\ref{data_example}中所示的隔夜互换、交易量为0（只有买价或卖价）的数据之后，得到共计1726条期权的交易数据。然而根据参考文献\cite{J-1972}\cite{Jame-1979}，一般认为离到期日较近的期权、价值更虚的期权往往定价不准确，因此之后进行回归时会做进一步筛选。
 }
 \subsection{比特币数据}
 \par{
@@ -36,17 +36,17 @@
 
 \section{数据描述}
     \par{
-        对数据搜集期比特币每日收盘价数据取对数收益率，按照30天滚动窗口计算其波动率、偏度、峰度\footnote{考虑到比特币市场在18年初开始变动巨大，采用更长期的窗口可能不能准确反映投资者观察到的波动率信息。}。对其描述性统计如下：}
+        对数据搜集期比特币每日收盘价数据取对数收益率，按照一年滚动窗口计算其波动率、偏度、峰度。对其描述性统计如下：}
 
         \begin{threeparttable}[H]
             
             \centering
             \caption{比特币数据描述性统计}
             \label{btc_describe}
-            \input{describe_btc_data.tex}
+            \input{new_describes/describe_btc_data.tex}
             \begin{tablenotes}
                 \footnotesize
-                \item 注：波动率、偏度、峰度用30天滚动窗口估计，均为日化数据；偏度为超额偏度；成交量以美元计量。
+                \item 注：波动率、偏度、峰度用一年（365天）滚动窗口估计，均为日化数据；偏度为超额偏度；成交量以美元计量。
             \end{tablenotes}
         \end{threeparttable}
         
@@ -54,7 +54,7 @@
     ~\\
     \par{
         
-        由表\ref{btc_describe}可见，数据期比特币存在一定的负偏度与高峰度。但二者的波动都相对较大，说明比特币市场的这些特性并不稳定。
+        由表\ref{btc_describe}可见，数据期比特币存在一定的负偏度与高峰度。其中峰度一直保持在0以上，说明比特币收益率存在偏峰厚尾现象，而偏度数据相对波动较大，总体上比较接近0偏度，同时对数收益率均值也非常接近0，说明比特币的收益分布非常接近存在尖峰厚尾现象的对称分布。
     }
     \newpage
     \par{
@@ -62,11 +62,10 @@
     }
     \par{
     \begin{threeparttable}[H]
-  
         \centering
-        \caption{比特币数据描述性统计}
+        \caption{期权数据描述性统计}
         \label{option_describe}
-        \input{describe_option_data.tex}
+        \input{new_describes/describe_option_data.tex}
         \begin{tablenotes}
             \footnotesize
             \item 注：此处统计已将期权按照到期日、行权价和方向分组。期限为第一个有交易的日期至到期日的天数。
@@ -75,5 +74,5 @@
     }
     ~\\
     \par{
-    从表\ref{option_describe}可见，认购期权数量略多于认沽期权，行权价的覆盖范围较广。存在一部分期限极短的数据，可能存在之前无交易的情况，会在实证研究中考虑删去。
+    从表\ref{option_describe}可见，认购期权数量略多于认沽期权，行权价的覆盖范围较广。存在一部分期限极短的数据，可能存在之前无交易的情况，会在实证研究中考虑将这类数据删去。
     }

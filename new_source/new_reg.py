@@ -64,18 +64,24 @@ price_result["amihud"]=btc_data["amihud"].loc[pd.DatetimeIndex(price_result["dat
 
 # mean_isd.plot()
 # plt.savefig("drift/figures/isd_plot.png")
-mean_isd=price_result.groupby("strike")["imply_vol"].mean()
+
+money_cut_more=pd.cut(price_result["S/X"],[0.3,0.6, 0.9,1.1,1.4,2.0,3.9],right=True)
+mean_isd=price_result.groupby(money_cut_more)["imply_vol"].mean()
+mean_isd.index=pd.Series(mean_isd.index).apply(lambda x:(x.left+x.right)/2).astype("double")
+
+mean_isd[price_result["S/X"].max()]=price_result["imply_vol"].loc[price_result["S/X"].idxmax()]
+mean_isd=mean_isd.sort_index()
+plt.plot(mean_isd)
+plt.savefig("drift/figures/mean_isd.png")
 def get_slope(x):
-    strike=x["strike"]
-    loc=mean_isd.index.get_loc(strike)
-    if loc==0:
-        return (mean_isd.iloc[1]-mean_isd.iloc[0])/(mean_isd.index[1]-mean_isd.index[0])
-    elif loc==mean_isd.shape[0]-1:
-        return (mean_isd.iloc[loc]-mean_isd.iloc[loc-1])/(mean_isd.index[loc]-mean_isd.index[loc-1])
+    moneyness=x["S/X"]
+    locate=mean_isd.index.searchsorted(moneyness)
+    if locate>0:
+        return (mean_isd.iloc[locate]-mean_isd.iloc[locate-1])/(mean_isd.index[locate]-mean_isd.index[locate-1])
+
     else:
-        slope1=(mean_isd.iloc[loc+1]-mean_isd.iloc[loc])/(mean_isd.index[loc+1]-mean_isd.index[loc])
-        slope2=(mean_isd.iloc[loc]-mean_isd.iloc[loc-1])/(mean_isd.index[loc]-mean_isd.index[loc-1])
-        return (slope1+slope2)/2
+        print("error!")
+        return float("nan")
 price_result["slope"]=price_result.apply(get_slope,axis=1)
 price_result["spread"] = price_result["last_ask"]-price_result["last_bid"]
 exchanges_price_data = pd.read_excel("data/bitcoinity_data.xlsx")
@@ -90,8 +96,8 @@ price_result["maxmin_ratio"] = btc_data["maxmin_ratio"].loc[pd.DatetimeIndex(
 
 
 price_result.rename(columns={"Volume":"btc_volume"},inplace=True)
-used_data = price_result[["bias","delta_5", "S/X","time", "vol_pre", "log_ret", "volatility", "skewness", "amihud",
-                          "spread", "open_interest", "contract_is_call",  "maxmin_ratio","slope","btc_volume","volume"]]
+used_data = price_result[["bias","delta_5", "S/X","time", "vol_pre", "log_ret", "volatility", "skewness", "kurtosis","amihud",
+                           "open_interest", "contract_is_call",  "maxmin_ratio","slope","btc_volume","volume"]]
 used_data = used_data.dropna()
 used_data = used_data.loc[-np.isinf(used_data.amihud)]
 used_data["time"]=np.log(used_data["time"])
@@ -106,13 +112,14 @@ used_data=used_data[
         "log_ret",
         "volatility",
         "skewness",
+        "kurtosis",
         "amihud",
         "maxmin_ratio",
         "btc_volume",
         "time",
         "delta_5",
         "vol_pre",
-        "spread",
+        
         "open_interest",
         "slope",
         "volume",
@@ -129,13 +136,14 @@ X=used_data[
         "log_ret",
         "volatility",
         "skewness",
+        "kurtosis",
         "amihud",
         "maxmin_ratio",
         "btc_volume",
         "time",
         "delta_5",
         "vol_pre",
-        "spread",
+        
         "open_interest",
         "slope",
         "volume",
@@ -160,8 +168,8 @@ with open("drift/new_describes/independent_variables_corr.tex","w") as f:
 
 X_corr.to_excel("new_data/independent_variables_corr.xlsx",index=False)
 used_data.to_excel("new_data/data_for_regression.xlsx",index=False)
-model_1_stepwise=stf.ols('''bias ~ log_ret + amihud + maxmin_ratio + btc_volume + 
-    delta_5 + vol_pre + spread + open_interest + slope + contract_is_call + 
+model_1_stepwise=stf.ols('''bias ~ log_ret + kurtosis + amihud + maxmin_ratio + btc_volume + 
+    delta_5 + vol_pre + open_interest + slope + contract_is_call + 
     inter_call_money + inter_put_money''',data=used_data,hasconst=True).fit()
 summaries = summary_col([model_1_stepwise], stars=True, model_names=["定价偏差"],info_dict={
                         "observations": lambda x: x.nobs, "R-Squared": lambda x: x.rsquared, "Adjusted R-Squared": lambda x: x.rsquared_adj})
@@ -173,7 +181,7 @@ def cut(x):
     return x
 
 
-with open("drift/new_describes/regression_table.tex", "w") as f:
+with open("drift/new_describes/regression_table.tex", "w",encoding="utf-8") as f:
     tex = summaries.as_latex()
     tex = cut(tex)
     f.write(tex)

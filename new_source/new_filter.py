@@ -66,18 +66,18 @@ get_bias_groups(price_result.query("not contract_is_call"),name="put")
 writer=pd.ExcelWriter("new_data/filtered_price_result.xlsx")
 with writer:
     price_result.to_excel(writer,index=False)
+result_describe=price_result["bias"].describe()
+result_describe.name="定价偏差"
 
-with open("drift/new_describes/dependent_variables_describe.tex","w") as f:
-    latex_str=price_result["bias"].describe().to_latex(float_format=lambda x: "{:.2f}".format(
-        x) if not isnan(x) else " ")
-    f.write(latex_str)
+call_describe=price_result.query("contract_is_call")["bias"].describe()
+call_describe.name="认购期权定价偏差"
 
-with open("drift/new_describes/call_dependent_variables_describe.tex","w") as f:
-    latex_str=price_result.query("contract_is_call")["bias"].describe().to_latex(float_format=lambda x: "{:.2f}".format(
-        x) if not isnan(x) else " ")
-    f.write(latex_str)
 
-with open("drift/new_describes/put_dependent_variables_describe.tex","w") as f:
-    latex_str=price_result.query("not contract_is_call")["bias"].describe().to_latex(float_format=lambda x: "{:.2f}".format(
+put_describe=price_result.query("not contract_is_call")["bias"].describe()
+put_describe.name="认沽期权定价偏差"
+
+total_describe=pd.concat([result_describe,call_describe,put_describe],axis=1)
+with open("drift/new_describes/dependent_variables_describe.tex","w",encoding="utf-8") as f:
+    latex_str=total_describe.to_latex(float_format=lambda x: "{:.3f}".format(
         x) if not isnan(x) else " ")
     f.write(latex_str)
