@@ -9,7 +9,7 @@ price_result = pd.read_excel("new_data/price_result.xlsx")
 filtered_result = pd.read_excel("new_data/filtered_price_result.xlsx")
 
 filtered_grouped = filtered_result.groupby("contract_label")
-btc_data = pd.read_excel("data/btc_data.xlsx")
+btc_data = pd.read_excel("new_data/btc_data.xlsx")
 
 
 price_result_grouped = price_result.groupby("contract_label")
@@ -138,11 +138,16 @@ writer = pd.ExcelWriter("data/returns_plainBS.xlsx")
 with writer:
     call_returns.to_excel(writer, sheet_name="call",index=False)
     put_returns.to_excel(writer, sheet_name="put",index=False)
-
-with open("drift/new_describes/call_return_describe.tex", "w") as f:
-    f.write(call_returns.describe().to_latex())
-with open("drift/new_describes/put_return_describe.tex", "w") as f:
-    f.write(put_returns.describe().to_latex())
+print((call_returns>0).value_counts())
+print((put_returns>0).value_counts())
+with open("drift/new_describes/call_return_describe.tex", "w",encoding="utf-8") as f:
+    call_descr=call_returns.describe()
+    call_descr.name="认购期权收益"
+    f.write(call_descr.to_latex(float_format="{:.2f}".format))
+with open("drift/new_describes/put_return_describe.tex", "w",encoding="utf-8") as f:
+    put_descr=put_returns.describe()
+    put_descr.name="认购期权收益"
+    f.write(put_descr.to_latex(float_format="{:.2f}".format))
 
 
 def get_delta(spot_price, strike_price, time, option_type, volatility, ints=0.05):
@@ -219,10 +224,16 @@ writer=pd.ExcelWriter("new_data/BS_continuous_hedge.xlsx")
 
 call_part=continuous_result.filter(like="Call")
 put_part=continuous_result.filter(like="Put")
+print((call_part>0).value_counts())
+print((put_part>0).value_counts())
 with writer:
     call_part.to_excel(writer,sheet_name="call",index=False)
     put_part.to_excel(writer,sheet_name="put",index=False)
-with open("drift/new_describes/call_continuous_return_describe.tex","w") as f:
-    f.write(call_part.describe().to_latex())
-with open("drift/new_describes/put_continuous_return_describe.tex","w") as f:
-    f.write(put_part.describe().to_latex())
+with open("drift/new_describes/call_continuous_return_describe.tex","w",encoding="utf-8") as f:
+    call_descr=call_part.describe()
+    call_descr.name="认购期权收益"
+    f.write(call_descr.to_latex(float_format="{:.2f}".format))
+with open("drift/new_describes/put_continuous_return_describe.tex","w",encoding="utf-8") as f:
+    put_descr=put_part.describe()
+    put_descr.name="认沽期权收益"
+    f.write(put_descr.to_latex(float_format="{:.2f}".format))

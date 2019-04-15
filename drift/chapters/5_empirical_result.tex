@@ -152,14 +152,24 @@ vol\_pre为波动率溢价（参见\ref{reg vars}），open\_interest为当日�
 \restoregeometry
 将认购期权和认沽期权分别回归后，可以发现很多变量对于两者有着不同的效应。
 \section{套利策略}
-将第\ref{strategy}节构建的策略应用到筛选后的数据上。一个普通的delta套利策略结果如下所示（分call和put描述）：
+将第\ref{strategy}节构建的策略应用到筛选后的数据上。一个普通的delta套利策略结果如下所示（分call和put描述）： 
 ~\\
-\input{new_describes/call_return_describe.tex}
-\input{new_describes/put_return_describe.tex}
-~\\
-对于认购期权，大部分期权都能获得较高的正向收益，而认沽期权则不能，可见认沽期权的定价误差可能更多地由于整体市场对期权需求维持在较高水平，导致其定价本身存在很高溢价，简单的B-S模型不能反映其真实价格。而用模型对认购期权定价则包含了一定的信息成分，能够被用于套利操作。
-% 采用第\ref{strategy}节介绍的最优对冲法则构建策略，得到的结果如下所示（分call和put描述）：
-% ~\\
-% \input{new_describes/call_opt_return_describe.tex}
-% \input{new_describes/put_opt_return_describe.tex}
-% ~\\
+\begin{table}
+    \caption{套利组合收益描述分析}
+    \centering
+    \input{new_describes/call_return_describe.tex}
+    \input{new_describes/put_return_describe.tex}
+\end{table}
+
+~\\ 
+对于认购期权，盈利金额均值大于0。对收益率序列做t检验，可得t值为3.40，对应的P-value在0.001以下，整体收益显著为正。同时胜率（收益中>0的比例）可以达到70$\%$，但仍然存在亏损比较严重的部分数据。
+对于认沽期权，盈利金额均值大于0。对收益率序列做t检验，可得t值为0.44，收益并不显著大于0。胜率为50$\%$，同时不论是亏损还是盈利均存在较大的极端值，并不稳定。说明认沽期权的真实价格与模型价格之间的差异是更加持续性的，模型对于认沽期权价格的确定包含的信息很少，相比之下，对认购期权而言，模型包含了一定的信息价值。部分期权利用模型包含的delta信息能够获得较高收益。
+\par{上述策略采用了逐天构建组合套利的模式。对于我们研究的流动性不佳的期权可能难以实现，我们可以考虑只需要买入、卖出一个期权，之后逐天用当天的delta份股票去对冲直至到期的策略。这样大幅降低了对期权频繁买卖的需求。为了充分利用全部数据，我们仍假设每天的每个交易我们都能够参与，买入实际价格低于模型价格的期权、卖出delta份股票或者卖出实际价格高于模型价格的期权、买入delta份股票，并在之后每天都动态调节股票数量，直至到期。结果如下：
+}
+\begin{table}[H]
+    \caption{动态对冲模式套利组合收益描述分析}
+    \centering
+    \input{new_describes/call_continuous_return_describe.tex}
+\input{new_describes/put_continuous_return_describe.tex}
+\end{table}
+所得结果与之前类似，所有认购期权结果的均值大于0，t值为5.4，显著大于0，但对认沽而言其收益的t值为1.96，而且胜率低于50$\%$。其结论与之前逐天构建资产的策略相比可能更加稳定。
