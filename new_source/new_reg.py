@@ -105,7 +105,7 @@ used_data["btc_volume"]=np.log(used_data["btc_volume"])
 used_data["inter_call_money"]=used_data["contract_is_call"]*used_data["S/X"]
 used_data["inter_put_money"]=(~used_data["contract_is_call"].astype("bool")).astype("int")*used_data["S/X"]
 used_data["inter_call_skewness"]=used_data["contract_is_call"]*used_data["skewness"]
-
+used_data.rename(columns={"delta_5":"delta"},inplace=True)
 used_data.to_excel("new_data/data_for_regression.xlsx",index=False)
 used_data=used_data[
     ["bias",
@@ -117,11 +117,11 @@ used_data=used_data[
         "maxmin_ratio",
         "btc_volume",
         "time",
-        "delta_5",
+        "delta",
         "vol_pre",
         
         "open_interest",
-        "slope",
+ 
         "volume",
         "contract_is_call",
         "inter_call_money",
@@ -141,11 +141,11 @@ X=used_data[
         "maxmin_ratio",
         "btc_volume",
         "time",
-        "delta_5",
+        "delta",
         "vol_pre",
         
         "open_interest",
-        "slope",
+
         "volume",
         "contract_is_call",
         "inter_call_money",
@@ -169,7 +169,7 @@ with open("drift/new_describes/independent_variables_corr.tex","w") as f:
 X_corr.to_excel("new_data/independent_variables_corr.xlsx",index=False)
 used_data.to_excel("new_data/data_for_regression.xlsx",index=False)
 model_1_stepwise=stf.ols('''bias ~ log_ret + kurtosis + amihud + maxmin_ratio + btc_volume + 
-    delta_5 + vol_pre + open_interest + slope + contract_is_call + 
+    delta + vol_pre + open_interest +time+ contract_is_call + 
     inter_call_money + inter_put_money''',data=used_data,hasconst=True).fit()
 summaries = summary_col([model_1_stepwise], stars=True, model_names=["定价偏差"],info_dict={
                         "observations": lambda x: x.nobs, "R-Squared": lambda x: x.rsquared, "Adjusted R-Squared": lambda x: x.rsquared_adj})

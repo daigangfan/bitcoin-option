@@ -79,7 +79,7 @@
         \item time 期权距离到期日的时间
         \item vol\_pre 期权的波动率溢价（Volatility Premimum），利用该期权当时的隐含波动率与当天至到期日之间的实现波动率之差计量。
         \item volume 期权当天交易量                                     
-        \item spread 期权当天公开的买卖价差
+        
         \item open\_interest 期权当天公开的持仓量
         \item contract\_is\_call 哑变量，是否为认购期权，1为认购期权，0为认沽期权。 
     \end{itemize}
@@ -102,7 +102,7 @@
     \end{equation}
     其中$\delta_{BS}$为Black-Scholes模型计算出的delta，$\gamma_{BS}$为Black-Scholes模型计算出的gamma。
     实际应用中，可以滚动估计包含delta和delta二次项的线性模型：
-    \begin{equation}
+    \begin{equation}\label{MVreg}
         \Delta{f}-\delta_{BS}\Delta{S}=\frac{\gamma_{BS}}{\sqrt{T}}\frac{\Delta{S}}{S}(\hat{a}+\hat{b}\delta_{BS}+\hat{c}\delta^2_{BS})+\epsilon
     \end{equation}
     得到参数之后带入式\ref{MVmodel}，可得到此时的对冲误差为：

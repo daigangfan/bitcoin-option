@@ -73,14 +73,7 @@
     \item \ocite{Jame-1979}以分组检验的方式研究了期权相对价值(moneyness)，到期时间等因素对期权定价差异的影响。
     \item \ocite{CHIRAS1978213}利用Black-Scholes模型的隐含波动率信息构建对冲策略，获得较高收益。
     \item \ocite{Bakshi-2003} 分析了Delta对冲策略收益与市场的波动率溢价的关系。
-    \item \ocite{10.1093/rfs/6.2.327} 将波动率用CIR过程建模，并得到了此条件下欧式期权价格的闭式解。其对股价建模为：
-    \begin{equation}\label{heston}
-      \begin{split}
-        &dS=\mu*S*dt+\sigma*{\sqrt{v(t)}}*S(t)dW_{1}(t) \\
-        &dv(t)=\kappa*[\theta-v(t)]dt+\sigma*\sqrt{v(t)}dW_{2}(t)
-      \end{split}
-    \end{equation}
-  \end{itemize}
+    
   本论文将主要参考以上方法，进行比特币期权的研究。
 \end{frame}
 
@@ -96,6 +89,7 @@
   \end{equation*}
   其中D为天数，R为日收益率，VOLD为交易额\newline
   本文将利用这一指标度量比特币市场的流动性，并将其作为自变量之一检验其和定价差异的相关性。
+
 \end{frame}
 \section{数据与研究方法}
 \subsection{数据来源}
@@ -103,17 +97,14 @@
   \begin{itemize}
     \item 期权交易数据来自data.ledgerx.com.LedgerX每日会披露流通中期权的种类、行权价、到期日、交易量、日加权均价（VWAP）、最新买卖价等信息。已利用Python爬虫获取，包含该交易所2017年10月17日至2018年12月31日的全部期权交易数据。
     \item 比特币交易数据来自coinmarketcap.com，已利用Python爬虫获取，包含期权数据对应时间段内的比特币价量数据（属于对各大主要比特币市场加权得到的交易数据）。
-    \item 后续可能加入Deribit的期权交易数据进行对比研究（数据可行来源：coinapi.io），二者区别主要在流动性上，Deribit的期权有明确的做市商，可能具有更强的流动性。
+    \item bitcoinity上有比特币主要美元交易所的信息，可以获得各大交易所之间的差价。
   \end{itemize}
 \end{frame}
 \subsection{部分数据统计描述}
-\begin{frame}[allowframebreaks]{部分数据统计描述}
-
-\begin{table}
-  \tiny
-  \caption{LedgerX期权数据统计描述}
+\begin{frame}[allowframebreaks]{数据统计描述}
   \begin{threeparttable}
-    \input{../drift/describe_option_data.tex}
+    \caption{LedgerX期权数据统计描述}
+    \input{../drift/new_describes/describe_option_data.tex}
   \begin{tablenotes}
     \tiny
     \item[1] 此处将条款相同的期权合并统计，实际中同一条款的期权有多日的交易数据可用。
@@ -121,39 +112,21 @@
   \end{tablenotes}
   \end{threeparttable}
   
-\end{table}
-\begin{table}
-  \tiny
-  \caption{比特币数据统计描述}
   \begin{threeparttable}
-    \input{../drift/describe_btc_data.tex}
+    \caption{比特币数据统计描述}
+    \input{../drift/new_describes/describe_btc_data.tex}
   \begin{tablenotes}
     \tiny
     \item[1] 比特币的波动率、峰度、偏度暂时使用30天滚动窗口计算。
     \item[2] 交易量用美元表示。
   \end{tablenotes}
   \end{threeparttable}
-  
-\end{table}
+
 \end{frame}
 
-\subsection{研究方法}
-\begin{frame}{研究方法}
-  \begin{itemize}
-    \item 用Black-Scholes模型(\ref{black})对期权进行定价。
-    \item 构建回归模型，检验市场波动率、偏度、期权期限、相对价值等变量与（真实价格-理论价格）差异的相关性，尝试从市场摩擦的角度解释。
-    \item 利用定价模型结果构建策略，通过观察策略盈利情况判断市场的失效可否被用于套利。比如：买入/卖出实际价格低于/高于模型价格的期权，同时卖出/买入delta份数字货币。
-    \item 选择含有随机波动率的Heston模型(\ref{heston})或者其他期权市场（如Deribit）进行研究并与前述结果比较分析。
-  \end{itemize}
-\end{frame}
-\subsection{时间安排}
-\begin{frame}{时间安排}
-  \begin{itemize}
-    \item 目前已完成期权交易和比特币交易数据搜集、清理、初步定价工作。
-    \item 第3-4周，深入阅读相关文献，完善定价模型和回归结果，构建delta对冲策略并得到回测收益。
-    \item 第4-5周，进行其他模型或期权市场的研究，进行对比。
-    \item 第6-7周，汇总并进一步完善结果。
-  \end{itemize}
+\subsection{研究成果}
+\begin{frame}{研究偏差描述}
+  
 \end{frame}
 
 \section*{参考文献}
