@@ -11,7 +11,7 @@ from statsmodels.formula import api as stf
 import matplotlib.pyplot as plt
 
 price_result = pd.read_excel("new_data/filtered_price_result.xlsx")
-btc_data = pd.read_excel("data/btc_data.xlsx")
+btc_data = pd.read_excel("new_data/btc_data.xlsx")
 if "skewness" not in price_result.columns:
     price_result = pd.merge(left=price_result, right=btc_data[[
         "Date", "skewness", "kurtosis", "log_ret","Volume"]], left_on="date", right_on="Date", how="left")
@@ -166,10 +166,10 @@ with open("drift/new_describes/independent_variables_corr.tex","w") as f:
         x) if not np.isnan(x) else " ")
     f.write(latex_str)
 
-X_corr.to_excel("new_data/independent_variables_corr.xlsx",index=False)
+X_corr.to_excel("new_data/independent_variables_corr.xlsx")
 used_data.to_excel("new_data/data_for_regression.xlsx",index=False)
-model_1_stepwise=stf.ols('''bias ~ log_ret + kurtosis + amihud + maxmin_ratio + btc_volume + 
-    delta + vol_pre + open_interest +time+ contract_is_call + 
+model_1_stepwise=stf.ols('''bias ~ log_ret + kurtosis + maxmin_ratio + amihud+btc_volume+
+    delta + vol_pre + open_interest + time + contract_is_call + 
     inter_call_money + inter_put_money''',data=used_data,hasconst=True).fit()
 summaries = summary_col([model_1_stepwise], stars=True, model_names=["定价偏差"],info_dict={
                         "observations": lambda x: x.nobs, "R-Squared": lambda x: x.rsquared, "Adjusted R-Squared": lambda x: x.rsquared_adj})
