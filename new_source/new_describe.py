@@ -60,10 +60,10 @@ with open("drift/new_describes/describe_option_data.tex", "w",encoding="utf-8") 
     f.write(option_describe.to_latex(
         float_format=lambda x: "{:.3f}".format(x) if not isnan(x) else " "))
 
-writer = pd.ExcelWriter("data/price_result.xlsx")
+writer = pd.ExcelWriter("new_data/price_result.xlsx")
 with writer:
     price_result.to_excel(writer,index=False)
 
-writer = pd.ExcelWriter("data/btc_data.xlsx")
+writer = pd.ExcelWriter("new_data/btc_data.xlsx")
 with writer:
     btc_data.to_excel(writer,index=False)

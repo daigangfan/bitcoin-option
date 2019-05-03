@@ -11,7 +11,7 @@ from statsmodels.formula import api as stf
 import matplotlib.pyplot as plt
 
 price_result = pd.read_excel("new_data/filtered_price_result.xlsx")
-btc_data = pd.read_excel("data/btc_data.xlsx")
+btc_data = pd.read_excel("new_data/btc_data.xlsx")
 if "skewness" not in price_result.columns:
     price_result = pd.merge(left=price_result, right=btc_data[[
         "Date", "skewness", "kurtosis", "log_ret","Volume"]], left_on="date", right_on="Date", how="left")
