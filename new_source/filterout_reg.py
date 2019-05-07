@@ -10,7 +10,7 @@ from scipy.stats import norm
 from statsmodels.formula import api as stf
 import matplotlib.pyplot as plt
 
-price_result = pd.read_excel("new_data/filtered_price_result.xlsx")
+price_result = pd.read_excel("new_data/filtered_out.xlsx")
 btc_data = pd.read_excel("new_data/btc_data.xlsx")
 if "skewness" not in price_result.columns:
     price_result = pd.merge(left=price_result, right=btc_data[[
@@ -71,8 +71,8 @@ mean_isd.index=pd.Series(mean_isd.index).apply(lambda x:(x.left+x.right)/2).asty
 
 mean_isd[price_result["S/X"].max()]=price_result["imply_vol"].loc[price_result["S/X"].idxmax()]
 mean_isd=mean_isd.sort_index()
-plt.plot(mean_isd)
-plt.savefig("drift/figures/mean_isd.png")
+# plt.plot(mean_isd)
+# plt.savefig("drift/figures/mean_isd.png")
 def get_slope(x):
     moneyness=x["S/X"]
     locate=mean_isd.index.searchsorted(moneyness)
@@ -106,7 +106,7 @@ used_data["inter_call_money"]=used_data["contract_is_call"]*used_data["S/X"]
 used_data["inter_put_money"]=(~used_data["contract_is_call"].astype("bool")).astype("int")*used_data["S/X"]
 used_data["inter_call_skewness"]=used_data["contract_is_call"]*used_data["skewness"]
 used_data.rename(columns={"delta_5":"delta"},inplace=True)
-used_data.to_excel("new_data/data_for_regression.xlsx",index=False)
+# used_data.to_excel("new_data/data_for_regression.xlsx",index=False)
 used_data=used_data[
     ["bias",
         "log_ret",
@@ -155,26 +155,26 @@ X=used_data[
 ]
 
 X_descr=X.describe()
-with open("drift/new_describes/independent_variables_describe.tex","w") as f:
-    latex_str=X_descr.to_latex(float_format=lambda x: "{:.2f}".format(
-        x) if not np.isnan(x) else " ")
-    f.write(latex_str)
-X_descr.to_excel("new_data/independent_variables_describe.xlsx",index=False)
-X_corr=X.corr()
-with open("drift/new_describes/independent_variables_corr.tex","w") as f:
-    latex_str=X_corr.to_latex(float_format=lambda x: "{:.2f}".format(
-        x) if not np.isnan(x) else " ")
-    f.write(latex_str)
+# with open("drift/new_describes/independent_variables_describe.tex","w") as f:
+#     latex_str=X_descr.to_latex(float_format=lambda x: "{:.2f}".format(
+#         x) if not np.isnan(x) else " ")
+#     f.write(latex_str)
+# X_descr.to_excel("new_data/independent_variables_describe.xlsx",index=False)
+# X_corr=X.corr()
+# with open("drift/new_describes/independent_variables_corr.tex","w") as f:
+#     latex_str=X_corr.to_latex(float_format=lambda x: "{:.2f}".format(
+#         x) if not np.isnan(x) else " ")
+#     f.write(latex_str)
 
-X_corr.to_excel("new_data/independent_variables_corr.xlsx",index=False)
-used_data.to_excel("new_data/data_for_regression.xlsx",index=False)
+# X_corr.to_excel("new_data/independent_variables_corr.xlsx",index=False)
+# used_data.to_excel("new_data/data_for_regression.xlsx",index=False)
+import pickle
+with open("new_data/model1_stepwise.pkl","rb") as f:
+    model1_in=pickle.load(f)
 model_1_stepwise=stf.ols('''bias ~ log_ret + kurtosis + amihud + maxmin_ratio + btc_volume + 
     delta + vol_pre + open_interest +time+ contract_is_call + 
     inter_call_money + inter_put_money''',data=used_data,hasconst=True).fit()
-import pickle
-with open("new_data/model1_stepwise.pkl","wb") as f:
-    pickle.dump(model_1_stepwise,f)
-summaries = summary_col([model_1_stepwise], stars=True, model_names=["定价偏差"],info_dict={
+summaries = summary_col([model1_in,model_1_stepwise], stars=True, model_names=["1","2"],info_dict={
                         "observations": lambda x: x.nobs, "R-Squared": lambda x: x.rsquared, "Adjusted R-Squared": lambda x: x.rsquared_adj})
 re_for_tabular = re.compile(r"\\begin{tabular}[\d\D]*\\end{tabular}")
 
@@ -184,10 +184,10 @@ def cut(x):
     return x
 
 
-with open("drift/new_describes/regression_table.tex", "w",encoding="utf-8") as f:
+with open("drift/new_describes/regression_table_out.tex", "w",encoding="utf-8") as f:
     tex = summaries.as_latex()
     tex = cut(tex)
     f.write(tex)
 
 price_result["contract_is_call"] = price_result["contract_is_call"].astype(bool)
-price_result.to_excel("new_data/filtered_price_result.xlsx",index=False)
+# price_result.to_excel("new_data/filtered_price_result.xlsx",index=False)
