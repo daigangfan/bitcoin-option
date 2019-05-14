@@ -44,14 +44,21 @@ btc_data_copy["Volume"]=btc_data_copy["Volume"]/1e8
 btc_describe = btc_data_copy.describe()
 btc_describe.loc["count"] = btc_describe.loc["count"].astype(int)
 btc_describe=btc_describe[["Volume","log_ret","volatility","skewness","kurtosis"]]
-
+btc_describe.drop(index=["25%","75%"],inplace=True)
 btc_describe.rename(columns={
     "Volume":"成交量",
     "log_ret":"对数收益率",
     "volatility":"波动率",
     "skewness":"偏度",
     "kurtosis":"峰度"
-},inplace=True)
+},index={
+"count":"数目",
+"mean":"均值",
+"std":"标准差",
+"min":"最小值",
+"50%":"中位数",
+"max":"最大值"
+    },inplace=True)
 
 
 with open("drift/new_describes/describe_btc_data.tex", "w",encoding="utf-8") as f:
@@ -67,12 +74,20 @@ option_describe.loc["count", "call_number"] = option_initial_data["contract_is_c
     1]
 option_describe.loc["count", "put_number"] = option_initial_data["contract_is_call"].value_counts()[
     0]
+option_describe.drop(index=["25%","75%"],inplace=True)
 option_describe.rename(columns={
 "time":"期限",
 "strike":"行权价",
 "call_number":"认购期权数量",
 "put_number":"认沽期权数量"
-},inplace=True)
+},    index={
+"count":"数目",
+"mean":"均值",
+"std":"标准差",
+"min":"最小值",
+"50%":"中位数",
+"max":"最大值"
+    },inplace=True)
 
 # TODO:更改行列名，添加附注
 with open("drift/new_describes/describe_option_data.tex", "w",encoding="utf-8") as f:

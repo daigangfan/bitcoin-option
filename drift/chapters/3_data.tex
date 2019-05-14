@@ -12,28 +12,34 @@
 \end{small}
 \end{figure}
 利用python爬虫获取了2017年10月17日至2018年12月31日的全部数据，剔除了如图\ref{data_example}中所示的隔夜互换、交易量为0（只有买价或卖价）的数据之后，得到共计1726条期权的交易数据。然而根据Black和Scholes(1972)\cite{J-1972}以及Macbeth和Merville(1979)\cite{Jame-1979}两次利用期权定价模型进行的实证研究，一般认为离到期日较近的期权、价值更虚的期权往往定价不准确，因此之后进行回归时会做进一步筛选。期权数据的成交量加权平均价可被认为是当天该期权的平均成交价格水平，故后文提到的“市场价格”均指该期权的成交量加权平均价。
-}
+} 
 
 \par{
 将期权交易数据按照其标签（即合约的到期日、行权价、认购/认沽方向）分组，并对基本信息统计如下：
 }
 \par{
-    \begin{center}
-        \begin{threeparttable}[H]
-            \centering
-            \caption{期权信息描述性统计}
-            \label{option_describe}
-            \input{new_describes/describe_option_data.tex}
-            \begin{tablenotes}
-                \footnotesize
-                \item 注：此处统计已将期权按照到期日、行权价和方向分组。期限为第一个有交易的日期至到期日的天数。
-            \end{tablenotes}
-            \end{threeparttable}
-    \end{center}
+\begin{center}
+\begin{threeparttable}[H]
+\centering
+\caption{期权信息描述性统计}
+\label{option_describe}
+\input{new_describes/describe_option_data.tex}
+\begin{tablenotes}
+\footnotesize
+\item 注：此处统计已将期权按照到期日、行权价和方向分组。期限为第一个有交易的日期至到期日的天数。
+\end{tablenotes}
+\end{threeparttable}
+\end{center}
 }
 ~\\
 \par{
-从表\ref{option_describe}可见，认购期权种类略多于认沽期权，目前期权的行权价覆盖范围已经较广，从2000元-50000元均有期权。对期权的期限而言，有50$\%$位于30天以下，此外存在一部分期限极短的数据，可能存在之前无交易的情况，在实证研究中将这部分数据删去，控制用于定价的期权的期限均在7天以上。
+从表\ref{option_describe}可见，认购期权种类略多于认沽期权，目前期权的行权价覆盖范围已经较广，从2000元-50000元均有期权。对期权的期限而言，有50$\%$位于30天以下，此外存在一部分期限极短的数据，可能存在之前无交易的情况。另一方面，根据Black和Scholes(1972,1973)\cite{J-1972}\cite{10.2307/1831029}，Macbeth和Merville(1979)\cite{Jame-1979}，深度价外期权和期限较短的期权并不适合用B-S模型定价。因此我们对数据做如下清理：
+\begin{itemize}
+    \item 剔除每日交易量仅有1的记录。
+    \item 剔除距离到期日在7日之内的记录。
+    \item 剔除认购期权的相对价值在0.8以下，认沽期权的相对价值在1.25以上的记录（相对价值定义为比特币市场价与期权行权价之比）。
+    
+\end{itemize}
 }
 \section{比特币数据}
 
@@ -58,7 +64,7 @@
 
 \par{
 对数据搜集期比特币每日收盘价数据取对数收益率，按照一年滚动窗口计算其波动率、偏度、峰度。对其描述性统计如下：}
-
+\begin{center}
 \begin{threeparttable}[H]
     
     \centering
@@ -70,7 +76,7 @@
         \item 注：波动率、偏度、峰度用一年（365天）滚动窗口估计，均为日化数据；偏度为超额偏度；成交量为亿美元；数据保留三位小数。
     \end{tablenotes}
 \end{threeparttable}
-
+\end{center}
 
 ~\\
 \par{
