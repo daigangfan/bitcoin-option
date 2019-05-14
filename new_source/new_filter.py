@@ -19,6 +19,12 @@ filtered_out=price_result_after_volume.loc[
 ]
 filtered_out.to_excel("new_data/filtered_out.xlsx",index=False)
 
+price_result_filtered_1=price_result_after_volume.loc[
+    (price_result_after_volume.contract_is_call & (price_result_after_volume["S/X"]>0.7)) |
+    (~price_result_after_volume.contract_is_call & (price_result_after_volume["S/X"]<1.3))
+]
+price_result_filtered_1.to_excel("new_data/price_result_filtered_1.xlsx",index=False)
+
 price_result=price_result_filtered
 price_result["time_cut"] = pd.cut(
     price_result["time"], [0, 30, 60, 180, 624], right=False)

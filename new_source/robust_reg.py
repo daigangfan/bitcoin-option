@@ -10,7 +10,7 @@ from scipy.stats import norm
 from statsmodels.formula import api as stf
 import matplotlib.pyplot as plt
 
-price_result = pd.read_excel("new_data/filtered_out.xlsx")
+price_result = pd.read_excel("new_data/price_result_filtered_1.xlsx")
 btc_data = pd.read_excel("new_data/btc_data.xlsx")
 if "skewness" not in price_result.columns:
     price_result = pd.merge(left=price_result, right=btc_data[[
@@ -168,6 +168,25 @@ X_descr=X.describe()
 
 # X_corr.to_excel("new_data/independent_variables_corr.xlsx",index=False)
 # used_data.to_excel("new_data/data_for_regression.xlsx",index=False)
-model_1_stepwise_out=stf.ols('''bias ~ log_ret + kurtosis + amihud + maxmin_ratio + btc_volume + 
+from new_reg import  model_1_stepwise
+from filterout_reg import model_1_stepwise_out
+model_2_stepwise_out=stf.ols('''bias ~ log_ret + kurtosis + amihud + maxmin_ratio + btc_volume + 
     delta + vol_pre + open_interest +time+ contract_is_call + 
     inter_call_money + inter_put_money''',data=used_data,hasconst=True).fit()
+summaries = summary_col([model_1_stepwise,model_1_stepwise_out,model_2_stepwise_out], stars=True, model_names=["call>0.8,put<1.25","call<0.8,put>1.25","call>0.7,put<1.3"],info_dict={
+                        "observations": lambda x: x.nobs, "R-Squared": lambda x: x.rsquared, "Adjusted R-Squared": lambda x: x.rsquared_adj})
+re_for_tabular = re.compile(r"\\begin{tabular}[\d\D]*\\end{tabular}")
+
+
+def cut(x):
+    x = re_for_tabular.findall(x)[0]
+    return x
+
+
+with open("drift/new_describes/regression_table_out.tex", "w",encoding="utf-8") as f:
+    tex = summaries.as_latex()
+    tex = cut(tex)
+    f.write(tex)
+
+price_result["contract_is_call"] = price_result["contract_is_call"].astype(bool)
+# price_result.to_excel("new_data/filtered_price_result.xlsx",index=False)

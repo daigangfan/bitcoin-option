@@ -25,6 +25,11 @@ short_model=stf.ols('''bias ~ log_ret + kurtosis + amihud + maxmin_ratio + btc_v
     delta + vol_pre + open_interest +time+ contract_is_call + 
     inter_call_money + inter_put_money''',data=short,hasconst=True).fit()
 
+
+
+
+
+
 summaries = summary_col([in_model,out_model,long_model,short_model], model_names=["价内期权","价外期权","30天以上","30天以下"],stars=True, info_dict={
                         "observations": lambda x: x.nobs, "R-Squared": lambda x: x.rsquared, "Adjusted R-Squared": lambda x: x.rsquared_adj})
 re_for_tabular = re.compile(r"\\begin{tabular}[\d\D]*\\end{tabular}")
@@ -32,6 +37,9 @@ re_for_tabular = re.compile(r"\\begin{tabular}[\d\D]*\\end{tabular}")
 def cut(x):
     x = re_for_tabular.findall(x)[0]
     return x
+
+
+
 
 
 with open("drift/new_describes/subsample_regression_table.tex", "w",encoding="utf-8") as f:
