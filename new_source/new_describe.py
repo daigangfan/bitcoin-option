@@ -7,6 +7,7 @@ from math import isnan
 import numpy as np 
 import matplotlib.pyplot as plt 
 plt.style.use("classic")
+plt.rcParams["font.sans-serif"]=["SimHei"]
 price_result = pd.read_excel("new_data/price_result.xlsx")
 price_result["S/X"] = price_result["spot_price"] / price_result["strike"]
 btc_data = pd.read_excel("new_data/btc_data.xlsx")
@@ -18,11 +19,27 @@ btc_data["kurtosis"] = btc_data["log_ret"].rolling(365).kurt()
 btc_data["amihud"]=np.abs(btc_data["log_ret"])/np.log(btc_data["Volume"])
 btc_data["amihud"]=btc_data["amihud"].rolling(30,min_periods=1).sum()
 
-plt.plot(btc_data["Date"],btc_data["volatility"])
-plt.xticks(rotation=30)
-plt.savefig("drift/figures/volatility.png")
+
 start_time = datetime.datetime(2017, 10, 17)
 btc_data = btc_data.query("Date>=@start_time")
+
+#画波动率图
+figure=plt.figure()
+ax=figure.add_subplot(111)
+ax.plot(btc_data["Date"],btc_data["volatility"]*np.sqrt(365)*100,"--",label="波动率")
+ax.set_xlabel("时间")
+ax.set_ylabel("年化波动率(%)")
+ax2=ax.twinx()
+ax2.set_ylabel("比特币价格(美元)")
+ax2.plot(btc_data["Date"],btc_data["Price"],"-",label="价格")
+line1,label1=ax.get_legend_handles_labels()
+line2,label2=ax2.get_legend_handles_labels()
+ax2.legend(line1+line2,label1+label2)
+for lab in ax.get_xticklabels():
+    lab.set_rotation(30)
+plt.savefig("drift/figures/volatility.png",bbox_inches="tight",dpi=800)
+
+
 btc_describe = btc_data.describe()
 btc_describe.loc["count"] = btc_describe.loc["count"].astype(int)
 btc_describe=btc_describe[["Volume","log_ret","volatility","skewness","kurtosis"]]

@@ -52,8 +52,8 @@ def get_bias_groups(price_result:pd.DataFrame,name=""):
     with open("drift/new_describes/{}_option_bias_group.tex".format(name), "w") as f:
         latex_str = const_bias_mean.to_latex(float_format=lambda x: "{:.3f}".format(
             x) if not isnan(x) else " ")
-        latex_str = latex_str.replace("[", "")
-        latex_str = latex_str.replace(")", "")
+        latex_str = latex_str.replace("[", "(")
+
 
         f.write(latex_str)
 

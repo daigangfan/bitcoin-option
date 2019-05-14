@@ -9,7 +9,8 @@ from math import log, exp, sqrt
 from scipy.stats import norm
 from statsmodels.formula import api as stf
 import matplotlib.pyplot as plt
-
+plt.style.use("classic")
+plt.rcParams["font.sans-serif"]=["SimHei"]
 price_result = pd.read_excel("new_data/filtered_price_result.xlsx")
 btc_data = pd.read_excel("new_data/btc_data.xlsx")
 if "skewness" not in price_result.columns:
@@ -191,3 +192,17 @@ with open("drift/new_describes/regression_table.tex", "w",encoding="utf-8") as f
 
 price_result["contract_is_call"] = price_result["contract_is_call"].astype(bool)
 price_result.to_excel("new_data/filtered_price_result.xlsx",index=False)
+
+#画max_min_ratio图
+figure=plt.figure(figsize=(20,10))
+ax=figure.add_subplot(122)
+ax.plot(btc_data["Date"],btc_data["maxmin_ratio"],"-",label="最大最小比值")
+ax.set_xlabel("时间")
+ax.set_ylabel("最大最小价格比值")
+ax2=figure.add_subplot(121)
+ax2.set_ylabel("比特币价格(美元)")
+ax2.plot(btc_data["Date"],btc_data["Price"],"-",label="价格")
+ax2.set_xlabel("时间")
+for lab in ax.get_xticklabels()+ax2.get_xticklabels():
+    lab.set_rotation(30)
+plt.savefig("drift/figures/maxmin_ratio_plot.png",bbox_inches="tight",dpi=500)
