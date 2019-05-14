@@ -194,15 +194,32 @@ price_result["contract_is_call"] = price_result["contract_is_call"].astype(bool)
 price_result.to_excel("new_data/filtered_price_result.xlsx",index=False)
 
 #画max_min_ratio图
-figure=plt.figure(figsize=(20,10))
-ax=figure.add_subplot(122)
+figure=plt.figure(figsize=(24,24))
+ax=figure.add_subplot(224)
 ax.plot(btc_data["Date"],btc_data["maxmin_ratio"],"-",label="最大最小比值")
 ax.set_xlabel("时间")
 ax.set_ylabel("最大最小价格比值")
-ax2=figure.add_subplot(121)
+ax.set_title("最大最小价格比值")
+
+ax2=figure.add_subplot(221)
 ax2.set_ylabel("比特币价格(美元)")
 ax2.plot(btc_data["Date"],btc_data["Price"],"-",label="价格")
+ax2.set_title("比特币价格(美元)")
 ax2.set_xlabel("时间")
-for lab in ax.get_xticklabels()+ax2.get_xticklabels():
+
+ax3=figure.add_subplot(222)
+ax3.plot(btc_data["Date"],btc_data["Volume"])
+ax3.set_title("比特币交易量")
+ax3.set_ylabel("比特币交易量")
+ax3.set_xlabel("时间")
+
+ax4=figure.add_subplot(223)
+ax4.plot(btc_data["Date"],btc_data["volatility"])
+ax4.set_title("比特币滚动估计波动率")
+ax4.set_ylabel("比特币滚动估计波动率")
+ax4.set_xlabel("时间")
+
+
+for lab in ax.get_xticklabels()+ax2.get_xticklabels()+ax3.get_xticklabels()+ax4.get_xticklabels():
     lab.set_rotation(30)
 plt.savefig("drift/figures/maxmin_ratio_plot.png",bbox_inches="tight",dpi=500)
