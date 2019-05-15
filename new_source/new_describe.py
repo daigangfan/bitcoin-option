@@ -37,7 +37,8 @@ line2,label2=ax2.get_legend_handles_labels()
 ax2.legend(line1+line2,label1+label2)
 for lab in ax.get_xticklabels():
     lab.set_rotation(30)
-plt.savefig("drift/figures/volatility.png",bbox_inches="tight",dpi=800)
+ax.set_title("比特币价格与波动率走势",fontdict={"fontsize":15})
+plt.savefig("drift/figures/volatility.png",bbox_inches="tight",dpi=500)
 
 btc_data_copy=btc_data.copy()
 btc_data_copy["Volume"]=btc_data_copy["Volume"]/1e8

@@ -79,14 +79,41 @@ with writer:
     price_result.to_excel(writer,index=False)
 result_describe=price_result["bias"].describe()
 result_describe.name="定价偏差"
-
+result_describe.drop(index=["25%","75%"],inplace=True)
+result_describe.rename(index={
+"count":"数目",
+"mean":"均值",
+"std":"标准差",
+"min":"最小值",
+"50%":"中位数",
+"max":"最大值"
+    },inplace=True)
 call_describe=price_result.query("contract_is_call")["bias"].describe()
 call_describe.name="认购期权定价偏差"
-
-
+call_describe.drop(index=["25%","75%"],inplace=True)
+call_describe.rename(
+    index={
+"count":"数目",
+"mean":"均值",
+"std":"标准差",
+"min":"最小值",
+"50%":"中位数",
+"max":"最大值"
+    },inplace=True
+)
 put_describe=price_result.query("not contract_is_call")["bias"].describe()
 put_describe.name="认沽期权定价偏差"
-
+put_describe.drop(index=["25%","75%"],inplace=True)
+put_describe.rename(
+    index={
+"count":"数目",
+"mean":"均值",
+"std":"标准差",
+"min":"最小值",
+"50%":"中位数",
+"max":"最大值"
+    },inplace=True
+)
 total_describe=pd.concat([result_describe,call_describe,put_describe],axis=1)
 with open("drift/new_describes/dependent_variables_describe.tex","w",encoding="utf-8") as f:
     latex_str=total_describe.to_latex(float_format=lambda x: "{:.3f}".format(
