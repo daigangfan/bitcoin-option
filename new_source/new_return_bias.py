@@ -25,3 +25,43 @@ results=results.transpose()
 with open("drift/new_describes/return_grouped_bias.tex", "w",encoding="utf-8") as f:
     f.write(results.to_latex(
         float_format=lambda x: "{:.3f}".format(x) if not np.isnan(x) else " "))
+
+
+price_result["volatility_cut"]=pd.qcut(price_result["volatility"],q=[0,0.2,0.4,0.6,0.8,1])
+call_result=price_result.loc[price_result["contract_is_call"]]
+call_bias_mean=call_result.groupby(call_result["volatility_cut"])["bias"].mean()
+put_result=price_result.loc[~price_result["contract_is_call"]]
+put_bias_mean=put_result.groupby(put_result["volatility_cut"])["bias"].mean()
+results=pd.concat([call_bias_mean,put_bias_mean,put_bias_mean-call_bias_mean],axis=1)
+results.columns=["认购期权平均偏差","认沽期权平均偏差","认沽-认购"]
+a1=[]
+for i in range(5):
+    bias_call=call_result.groupby(call_result["volatility_cut"]).get_group(results.index[i])["bias"]
+    bias_put=put_result.groupby(put_result["volatility_cut"]).get_group(results.index[i])["bias"]
+    a1.append(stats.ttest_ind(bias_put,bias_call,equal_var=False).statistic)
+results["t值"]=a1
+results.index=["波动率组1","波动率组2","波动率组3","波动率组4","波动率组5"]
+results=results.transpose()
+with open("drift/new_describes/volatility_grouped_bias.tex", "w",encoding="utf-8") as f:
+    f.write(results.to_latex(
+        float_format=lambda x: "{:.3f}".format(x) if not np.isnan(x) else " "))
+
+
+price_result["volume_cut"]=pd.qcut(price_result["Volume"],q=[0,0.2,0.4,0.6,0.8,1])
+call_result=price_result.loc[price_result["contract_is_call"]]
+call_bias_mean=call_result.groupby(call_result["volume_cut"])["bias"].mean()
+put_result=price_result.loc[~price_result["contract_is_call"]]
+put_bias_mean=put_result.groupby(put_result["volume_cut"])["bias"].mean()
+results=pd.concat([call_bias_mean,put_bias_mean,put_bias_mean-call_bias_mean],axis=1)
+results.columns=["认购期权平均偏差","认沽期权平均偏差","认沽-认购"]
+a1=[]
+for i in range(5):
+    bias_call=call_result.groupby(call_result["volume_cut"]).get_group(results.index[i])["bias"]
+    bias_put=put_result.groupby(put_result["volume_cut"]).get_group(results.index[i])["bias"]
+    a1.append(stats.ttest_ind(bias_put,bias_call,equal_var=False).statistic)
+results["t值"]=a1
+results.index=["波动率组1","波动率组2","波动率组3","波动率组4","波动率组5"]
+results=results.transpose()
+with open("drift/new_describes/volume_grouped_bias.tex", "w",encoding="utf-8") as f:
+    f.write(results.to_latex(
+        float_format=lambda x: "{:.3f}".format(x) if not np.isnan(x) else " "))
